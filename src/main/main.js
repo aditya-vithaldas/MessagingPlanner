@@ -152,6 +152,22 @@ ipcMain.handle('reset-setup', () => {
 });
 
 // Gmail handlers
+ipcMain.handle('gmail-set-credentials', (event, clientId, clientSecret) => {
+  store.set('gmail.clientId', clientId);
+  store.set('gmail.clientSecret', clientSecret);
+  // Reinitialize Gmail service with new credentials
+  gmailService = new GmailService(store, mainWindow, databaseService);
+  return { success: true };
+});
+
+ipcMain.handle('gmail-get-credentials-status', () => {
+  const clientId = store.get('gmail.clientId');
+  const clientSecret = store.get('gmail.clientSecret');
+  return {
+    configured: !!(clientId && clientSecret)
+  };
+});
+
 ipcMain.handle('gmail-auth', async () => {
   return await gmailService.authenticate();
 });
@@ -161,7 +177,9 @@ ipcMain.handle('gmail-get-summary', async () => {
 });
 
 ipcMain.handle('gmail-disconnect', () => {
-  store.delete('gmail');
+  store.delete('gmail.tokens');
+  store.delete('gmail.authenticated');
+  // Keep credentials so user can reconnect
   return true;
 });
 

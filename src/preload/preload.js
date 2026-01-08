@@ -14,6 +14,8 @@ contextBridge.exposeInMainWorld('api', {
   gmailAuth: () => ipcRenderer.invoke('gmail-auth'),
   gmailGetSummary: () => ipcRenderer.invoke('gmail-get-summary'),
   gmailDisconnect: () => ipcRenderer.invoke('gmail-disconnect'),
+  gmailSetCredentials: (clientId, clientSecret) => ipcRenderer.invoke('gmail-set-credentials', clientId, clientSecret),
+  gmailGetCredentialsStatus: () => ipcRenderer.invoke('gmail-get-credentials-status'),
   onGmailAuthSuccess: (callback) => {
     ipcRenderer.on('gmail-auth-success', callback);
     return () => ipcRenderer.removeListener('gmail-auth-success', callback);

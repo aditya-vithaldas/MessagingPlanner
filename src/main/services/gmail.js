@@ -3,16 +3,7 @@ const { shell } = require('electron');
 const http = require('http');
 const url = require('url');
 
-// You'll need to create these credentials at https://console.cloud.google.com/
-// 1. Create a new project
-// 2. Enable Gmail API
-// 3. Create OAuth 2.0 credentials (Desktop app)
-// 4. Set environment variables GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET
-const CREDENTIALS = {
-  client_id: process.env.GMAIL_CLIENT_ID || '',
-  client_secret: process.env.GMAIL_CLIENT_SECRET || '',
-  redirect_uri: 'http://localhost:3000/oauth2callback'
-};
+const REDIRECT_URI = 'http://localhost:3000/oauth2callback';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
@@ -24,26 +15,52 @@ class GmailService {
     this.store = store;
     this.mainWindow = mainWindow;
     this.db = database;
-    this.oauth2Client = new google.auth.OAuth2(
-      CREDENTIALS.client_id,
-      CREDENTIALS.client_secret,
-      CREDENTIALS.redirect_uri
-    );
+    this.oauth2Client = null;
 
-    // Load saved tokens if available
-    const tokens = this.store.get('gmail.tokens');
-    if (tokens) {
-      this.oauth2Client.setCredentials(tokens);
+    // Initialize OAuth client with stored credentials
+    this.initializeOAuthClient();
+  }
+
+  initializeOAuthClient() {
+    const clientId = this.store.get('gmail.clientId');
+    const clientSecret = this.store.get('gmail.clientSecret');
+
+    if (clientId && clientSecret) {
+      this.oauth2Client = new google.auth.OAuth2(
+        clientId,
+        clientSecret,
+        REDIRECT_URI
+      );
+
+      // Load saved tokens if available
+      const tokens = this.store.get('gmail.tokens');
+      if (tokens) {
+        this.oauth2Client.setCredentials(tokens);
+      }
+
+      // Handle token refresh
+      this.oauth2Client.on('tokens', (tokens) => {
+        const currentTokens = this.store.get('gmail.tokens', {});
+        this.store.set('gmail.tokens', { ...currentTokens, ...tokens });
+      });
     }
+  }
 
-    // Handle token refresh
-    this.oauth2Client.on('tokens', (tokens) => {
-      const currentTokens = this.store.get('gmail.tokens', {});
-      this.store.set('gmail.tokens', { ...currentTokens, ...tokens });
-    });
+  isCredentialsConfigured() {
+    const clientId = this.store.get('gmail.clientId');
+    const clientSecret = this.store.get('gmail.clientSecret');
+    return !!(clientId && clientSecret);
   }
 
   async authenticate() {
+    // Check if credentials are configured
+    if (!this.isCredentialsConfigured()) {
+      throw new Error('Gmail OAuth credentials not configured. Please enter your Client ID and Client Secret.');
+    }
+
+    // Reinitialize OAuth client in case credentials were just set
+    this.initializeOAuthClient();
+
     return new Promise((resolve, reject) => {
       // Create a local server to handle the OAuth callback
       const server = http.createServer(async (req, res) => {
