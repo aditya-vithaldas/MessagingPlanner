@@ -163,7 +163,12 @@ class WhatsAppService {
     let newMessages = 0;
 
     try {
-      const chats = await this.client.getChats();
+      const chats = await this.withTimeout(this.client.getChats(), 30000, []);
+
+      if (!chats || chats.length === 0) {
+        console.log('No chats available for sync');
+        return { error: 'No chats available', newMessages: 0 };
+      }
 
       for (const chat of chats.slice(0, 50)) {
         const chatName = chat.name || chat.id.user || 'Unknown';
@@ -179,9 +184,9 @@ class WhatsAppService {
         });
 
         // For incremental sync, fetch fewer messages (most recent only)
-        // For full sync, fetch more to cover the month
+        // For full sync, fetch more to cover the month (with timeout)
         const fetchLimit = isIncremental ? 100 : 500;
-        const messages = await chat.fetchMessages({ limit: fetchLimit });
+        const messages = await this.withTimeout(chat.fetchMessages({ limit: fetchLimit }), 15000, []);
 
         // Filter to messages newer than sync time
         const newMsgs = messages.filter(m => m.timestamp > syncFromTime);
@@ -215,8 +220,22 @@ class WhatsAppService {
     }
   }
 
+  // Helper to wrap promises with timeout
+  withTimeout(promise, ms, fallback = null) {
+    let timeoutId;
+    const timeoutPromise = new Promise((resolve) => {
+      timeoutId = setTimeout(() => resolve(fallback), ms);
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+  }
+
   async getSummary(timeFilter = 'all') {
     if (!this.isReady || !this.client) {
+      // Try to return cached data from database if available
+      const dbData = this.getFromDatabase(timeFilter);
+      if (dbData && dbData.totalMessages > 0) {
+        return dbData;
+      }
       return {
         error: 'WhatsApp not connected',
         authenticated: false,
@@ -228,8 +247,14 @@ class WhatsAppService {
       // Sync to database first (in background for fresh data)
       this.syncToDatabase().catch(err => console.error('Background sync error:', err));
 
-      // Get all chats
-      const chats = await this.client.getChats();
+      // Get all chats with timeout
+      const chats = await this.withTimeout(this.client.getChats(), 30000, []);
+
+      if (!chats || chats.length === 0) {
+        const dbData = this.getFromDatabase(timeFilter);
+        if (dbData) return dbData;
+        return { error: 'Could not fetch chats', authenticated: this.isReady };
+      }
 
       // Calculate time boundaries
       const now = Date.now() / 1000;
@@ -248,9 +273,9 @@ class WhatsAppService {
       for (const chat of chats.slice(0, 30)) {
         totalUnread += chat.unreadCount || 0;
 
-        // Fetch messages - get more for month view
+        // Fetch messages - get more for month view (with timeout)
         const limit = timeFilter === 'month' ? 500 : 100;
-        const messages = await chat.fetchMessages({ limit });
+        const messages = await this.withTimeout(chat.fetchMessages({ limit }), 15000, []);
 
         if (messages.length > 0) {
           // Filter messages based on timeFilter
@@ -280,9 +305,9 @@ class WhatsAppService {
       groupSummaries.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0) || (b.lastActivity || 0) - (a.lastActivity || 0));
       contactSummaries.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0) || (b.lastActivity || 0) - (a.lastActivity || 0));
 
-      // Get contact count
-      const contacts = await this.client.getContacts();
-      const savedContacts = contacts.filter(c => c.isMyContact).length;
+      // Get contact count (with timeout)
+      const contacts = await this.withTimeout(this.client.getContacts(), 10000, []);
+      const savedContacts = contacts ? contacts.filter(c => c.isMyContact).length : 0;
 
       // Generate overall summary
       const overallSummary = this.generateOverallSummary(groupSummaries, contactSummaries, totalUnread);
@@ -303,6 +328,14 @@ class WhatsAppService {
       };
     } catch (error) {
       console.error('WhatsApp getSummary error:', error);
+      // If we get a protocol error, try returning cached data
+      if (error.message?.includes('Protocol error') || error.message?.includes('Promise was collected')) {
+        const dbData = this.getFromDatabase(timeFilter);
+        if (dbData && dbData.totalMessages > 0) {
+          dbData.warning = 'Using cached data due to connection issue';
+          return dbData;
+        }
+      }
       return { error: error.message, authenticated: this.isReady };
     }
   }
