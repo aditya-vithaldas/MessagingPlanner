@@ -720,6 +720,9 @@
 
       let html = text;
 
+      // Convert [[topic]] to clickable tags
+      html = html.replace(/\[\[(.+?)\]\]/g, '<span class="topic-tag" onclick="showTopicDetails(\'$1\')">$1</span>');
+
       // Convert **bold** to <strong>
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
