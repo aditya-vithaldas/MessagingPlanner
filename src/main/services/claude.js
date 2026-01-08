@@ -210,21 +210,28 @@ RULES:
 - Only include items that actually need action
 - If nothing needs action, say "No action items right now"`,
 
-      whatsapp: `List action items from these WhatsApp messages as simple todo items.
+      whatsapp: `List ONLY specific action items from these WhatsApp messages.
 
-Format each as a clear task:
-- Reply to Mom about Saturday dinner plans
-- Send Raj the photos he asked for
-- Confirm with the group if you're joining the trip
-- Call Dad back - he asked you to call
+Good examples (SPECIFIC):
+- Reply to Mom about whether you're bringing dessert on Saturday
+- Send Raj the Goa trip photos he asked for
+- Tell the group your answer about the Friday dinner plan
+- Call Dad back - he asked you to call about the car
+
+Bad examples (TOO VAGUE - do NOT include):
+- "Check messages"
+- "Respond to group"
+- "Follow up with family"
+- "Review conversations"
+- "Stay connected"
+- "Keep in touch"
 
 RULES:
-- Write as clear tasks starting with action verbs
-- Include the person's name and what they need
-- NO metadata like "From:", "Chat:", "Urgency:"
-- NO numbered lists - just bullet points
-- Only real requests or questions directed at the user
-- If nothing needs action, say "No action items right now"`,
+- ONLY include items where someone specifically asked YOU something
+- Must have a specific person AND specific topic
+- NO vague items like "respond to messages" or "check updates"
+- NO generic relationship advice like "stay in touch"
+- If no SPECIFIC action items exist, say "No action items right now"`,
 
       notion: `List suggested actions based on this Notion activity.
 
