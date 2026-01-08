@@ -1,17 +1,33 @@
-const Database = require('better-sqlite3');
+const initSqlJs = require('sql.js');
 const path = require('path');
+const fs = require('fs');
 const { app } = require('electron');
 
 class DatabaseService {
   constructor() {
-    const dbPath = path.join(app.getPath('userData'), 'mybrain.db');
-    this.db = new Database(dbPath);
+    this.db = null;
+    this.dbPath = path.join(app.getPath('userData'), 'mybrain.db');
+    this.ready = this.initialize();
+  }
+
+  async initialize() {
+    const SQL = await initSqlJs();
+
+    // Load existing database or create new one
+    if (fs.existsSync(this.dbPath)) {
+      const fileBuffer = fs.readFileSync(this.dbPath);
+      this.db = new SQL.Database(fileBuffer);
+    } else {
+      this.db = new SQL.Database();
+    }
+
     this.initTables();
+    return true;
   }
 
   initTables() {
     // WhatsApp messages
-    this.db.exec(`
+    this.db.run(`
       CREATE TABLE IF NOT EXISTS whatsapp_messages (
         id TEXT PRIMARY KEY,
         chat_id TEXT,
@@ -27,7 +43,7 @@ class DatabaseService {
     `);
 
     // WhatsApp chats
-    this.db.exec(`
+    this.db.run(`
       CREATE TABLE IF NOT EXISTS whatsapp_chats (
         id TEXT PRIMARY KEY,
         name TEXT,
@@ -39,7 +55,7 @@ class DatabaseService {
     `);
 
     // Gmail messages
-    this.db.exec(`
+    this.db.run(`
       CREATE TABLE IF NOT EXISTS gmail_messages (
         id TEXT PRIMARY KEY,
         thread_id TEXT,
@@ -58,7 +74,7 @@ class DatabaseService {
     `);
 
     // Notion pages
-    this.db.exec(`
+    this.db.run(`
       CREATE TABLE IF NOT EXISTS notion_pages (
         id TEXT PRIMARY KEY,
         title TEXT,
@@ -74,7 +90,7 @@ class DatabaseService {
     `);
 
     // Sync log to track last sync time
-    this.db.exec(`
+    this.db.run(`
       CREATE TABLE IF NOT EXISTS sync_log (
         source TEXT PRIMARY KEY,
         last_sync_at INTEGER,
@@ -83,29 +99,64 @@ class DatabaseService {
     `);
 
     // Create indexes for faster queries
-    this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_whatsapp_timestamp ON whatsapp_messages(timestamp);
-      CREATE INDEX IF NOT EXISTS idx_whatsapp_chat ON whatsapp_messages(chat_id);
-      CREATE INDEX IF NOT EXISTS idx_gmail_timestamp ON gmail_messages(timestamp);
-      CREATE INDEX IF NOT EXISTS idx_notion_edited ON notion_pages(last_edited_time);
-    `);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_whatsapp_timestamp ON whatsapp_messages(timestamp)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_whatsapp_chat ON whatsapp_messages(chat_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_gmail_timestamp ON gmail_messages(timestamp)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_notion_edited ON notion_pages(last_edited_time)`);
+
+    this.save();
+  }
+
+  save() {
+    if (this.db) {
+      const data = this.db.export();
+      const buffer = Buffer.from(data);
+      fs.writeFileSync(this.dbPath, buffer);
+    }
+  }
+
+  // Helper to convert result to array of objects
+  queryAll(sql, params = []) {
+    const stmt = this.db.prepare(sql);
+    if (params.length > 0) {
+      stmt.bind(params);
+    }
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
+  }
+
+  queryOne(sql, params = []) {
+    const results = this.queryAll(sql, params);
+    return results.length > 0 ? results[0] : null;
+  }
+
+  runSql(sql, params = []) {
+    if (params.length > 0) {
+      this.db.run(sql, params);
+    } else {
+      this.db.run(sql);
+    }
   }
 
   // WhatsApp methods
   upsertWhatsAppChat(chat) {
-    const stmt = this.db.prepare(`
+    const now = Math.floor(Date.now() / 1000);
+    this.runSql(`
       INSERT OR REPLACE INTO whatsapp_chats (id, name, is_group, participant_count, last_message_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, strftime('%s', 'now'))
-    `);
-    stmt.run(chat.id, chat.name, chat.isGroup ? 1 : 0, chat.participantCount || 0, chat.lastMessageAt || 0);
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [chat.id, chat.name, chat.isGroup ? 1 : 0, chat.participantCount || 0, chat.lastMessageAt || 0, now]);
+    this.save();
   }
 
   upsertWhatsAppMessage(message) {
-    const stmt = this.db.prepare(`
+    this.runSql(`
       INSERT OR REPLACE INTO whatsapp_messages (id, chat_id, chat_name, is_group, sender, body, timestamp, from_me, has_media)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
+    `, [
       message.id,
       message.chatId,
       message.chatName,
@@ -115,22 +166,18 @@ class DatabaseService {
       message.timestamp,
       message.fromMe ? 1 : 0,
       message.hasMedia ? 1 : 0
-    );
+    ]);
+    this.save();
   }
 
   bulkUpsertWhatsAppMessages(messages) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO whatsapp_messages (id, chat_id, chat_name, is_group, sender, body, timestamp, from_me, has_media)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const insertMany = this.db.transaction((msgs) => {
-      for (const m of msgs) {
-        stmt.run(m.id, m.chatId, m.chatName, m.isGroup ? 1 : 0, m.sender, m.body, m.timestamp, m.fromMe ? 1 : 0, m.hasMedia ? 1 : 0);
-      }
-    });
-
-    insertMany(messages);
+    for (const m of messages) {
+      this.runSql(`
+        INSERT OR REPLACE INTO whatsapp_messages (id, chat_id, chat_name, is_group, sender, body, timestamp, from_me, has_media)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [m.id, m.chatId, m.chatName, m.isGroup ? 1 : 0, m.sender, m.body, m.timestamp, m.fromMe ? 1 : 0, m.hasMedia ? 1 : 0]);
+    }
+    this.save();
   }
 
   getWhatsAppMessages(timeFilter = 'all') {
@@ -150,28 +197,23 @@ class DatabaseService {
       whereClause = `WHERE timestamp >= ${monthAgo}`;
     }
 
-    return this.db.prepare(`
-      SELECT * FROM whatsapp_messages ${whereClause} ORDER BY timestamp DESC
-    `).all();
+    return this.queryAll(`SELECT * FROM whatsapp_messages ${whereClause} ORDER BY timestamp DESC`);
   }
 
   getWhatsAppChats() {
-    return this.db.prepare(`SELECT * FROM whatsapp_chats ORDER BY last_message_at DESC`).all();
+    return this.queryAll(`SELECT * FROM whatsapp_chats ORDER BY last_message_at DESC`);
   }
 
   getWhatsAppMessagesByChat(chatId, limit = 100) {
-    return this.db.prepare(`
-      SELECT * FROM whatsapp_messages WHERE chat_id = ? ORDER BY timestamp DESC LIMIT ?
-    `).all(chatId, limit);
+    return this.queryAll(`SELECT * FROM whatsapp_messages WHERE chat_id = ? ORDER BY timestamp DESC LIMIT ?`, [chatId, limit]);
   }
 
   // Gmail methods
   upsertGmailMessage(email) {
-    const stmt = this.db.prepare(`
+    this.runSql(`
       INSERT OR REPLACE INTO gmail_messages (id, thread_id, from_email, from_name, to_email, subject, snippet, body_preview, timestamp, is_unread, labels, category)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
+    `, [
       email.id,
       email.threadId,
       email.fromEmail,
@@ -184,22 +226,18 @@ class DatabaseService {
       email.isUnread ? 1 : 0,
       JSON.stringify(email.labels || []),
       email.category
-    );
+    ]);
+    this.save();
   }
 
   bulkUpsertGmailMessages(emails) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO gmail_messages (id, thread_id, from_email, from_name, to_email, subject, snippet, body_preview, timestamp, is_unread, labels, category)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const insertMany = this.db.transaction((msgs) => {
-      for (const e of msgs) {
-        stmt.run(e.id, e.threadId, e.fromEmail, e.fromName, e.toEmail, e.subject, e.snippet, e.bodyPreview, e.timestamp, e.isUnread ? 1 : 0, JSON.stringify(e.labels || []), e.category);
-      }
-    });
-
-    insertMany(emails);
+    for (const e of emails) {
+      this.runSql(`
+        INSERT OR REPLACE INTO gmail_messages (id, thread_id, from_email, from_name, to_email, subject, snippet, body_preview, timestamp, is_unread, labels, category)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [e.id, e.threadId, e.fromEmail, e.fromName, e.toEmail, e.subject, e.snippet, e.bodyPreview, e.timestamp, e.isUnread ? 1 : 0, JSON.stringify(e.labels || []), e.category]);
+    }
+    this.save();
   }
 
   getGmailMessages(timeFilter = 'all') {
@@ -219,9 +257,7 @@ class DatabaseService {
       whereClause = `WHERE timestamp >= ${monthAgo}`;
     }
 
-    const rows = this.db.prepare(`
-      SELECT * FROM gmail_messages ${whereClause} ORDER BY timestamp DESC
-    `).all();
+    const rows = this.queryAll(`SELECT * FROM gmail_messages ${whereClause} ORDER BY timestamp DESC`);
 
     return rows.map(r => ({
       ...r,
@@ -232,11 +268,10 @@ class DatabaseService {
 
   // Notion methods
   upsertNotionPage(page) {
-    const stmt = this.db.prepare(`
+    this.runSql(`
       INSERT OR REPLACE INTO notion_pages (id, title, parent_id, parent_type, url, created_time, last_edited_time, content_preview, properties)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
+    `, [
       page.id,
       page.title,
       page.parentId,
@@ -246,22 +281,18 @@ class DatabaseService {
       page.lastEditedTime,
       page.contentPreview,
       JSON.stringify(page.properties || {})
-    );
+    ]);
+    this.save();
   }
 
   bulkUpsertNotionPages(pages) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO notion_pages (id, title, parent_id, parent_type, url, created_time, last_edited_time, content_preview, properties)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const insertMany = this.db.transaction((pgs) => {
-      for (const p of pgs) {
-        stmt.run(p.id, p.title, p.parentId, p.parentType, p.url, p.createdTime, p.lastEditedTime, p.contentPreview, JSON.stringify(p.properties || {}));
-      }
-    });
-
-    insertMany(pages);
+    for (const p of pages) {
+      this.runSql(`
+        INSERT OR REPLACE INTO notion_pages (id, title, parent_id, parent_type, url, created_time, last_edited_time, content_preview, properties)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [p.id, p.title, p.parentId, p.parentType, p.url, p.createdTime, p.lastEditedTime, p.contentPreview, JSON.stringify(p.properties || {})]);
+    }
+    this.save();
   }
 
   getNotionPages(timeFilter = 'all') {
@@ -276,9 +307,7 @@ class DatabaseService {
       whereClause = `WHERE last_edited_time >= ${monthAgo}`;
     }
 
-    const rows = this.db.prepare(`
-      SELECT * FROM notion_pages ${whereClause} ORDER BY last_edited_time DESC
-    `).all();
+    const rows = this.queryAll(`SELECT * FROM notion_pages ${whereClause} ORDER BY last_edited_time DESC`);
 
     return rows.map(r => ({
       ...r,
@@ -288,33 +317,38 @@ class DatabaseService {
 
   // Sync log methods
   updateSyncLog(source, recordsSynced) {
-    const stmt = this.db.prepare(`
+    const now = Math.floor(Date.now() / 1000);
+    this.runSql(`
       INSERT OR REPLACE INTO sync_log (source, last_sync_at, records_synced)
-      VALUES (?, strftime('%s', 'now'), ?)
-    `);
-    stmt.run(source, recordsSynced);
+      VALUES (?, ?, ?)
+    `, [source, now, recordsSynced]);
+    this.save();
   }
 
   getLastSyncTime(source) {
-    const row = this.db.prepare(`SELECT last_sync_at FROM sync_log WHERE source = ?`).get(source);
+    const row = this.queryOne(`SELECT last_sync_at FROM sync_log WHERE source = ?`, [source]);
     return row ? row.last_sync_at : null;
   }
 
   // Stats
   getStats() {
-    const whatsappCount = this.db.prepare(`SELECT COUNT(*) as count FROM whatsapp_messages`).get().count;
-    const gmailCount = this.db.prepare(`SELECT COUNT(*) as count FROM gmail_messages`).get().count;
-    const notionCount = this.db.prepare(`SELECT COUNT(*) as count FROM notion_pages`).get().count;
+    const whatsappCount = this.queryOne(`SELECT COUNT(*) as count FROM whatsapp_messages`);
+    const gmailCount = this.queryOne(`SELECT COUNT(*) as count FROM gmail_messages`);
+    const notionCount = this.queryOne(`SELECT COUNT(*) as count FROM notion_pages`);
 
     return {
-      whatsapp: whatsappCount,
-      gmail: gmailCount,
-      notion: notionCount
+      whatsapp: whatsappCount ? whatsappCount.count : 0,
+      gmail: gmailCount ? gmailCount.count : 0,
+      notion: notionCount ? notionCount.count : 0
     };
   }
 
   close() {
-    this.db.close();
+    if (this.db) {
+      this.save();
+      this.db.close();
+      this.db = null;
+    }
   }
 }
 

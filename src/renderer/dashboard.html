@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     .dashboard-container {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -28,7 +28,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
@@ -48,151 +48,343 @@
       opacity: 0.5;
     }
     .source-tab-icon {
-      font-size: 24px;
+      font-size: 22px;
     }
     .source-tab-label {
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
     .source-tab-status {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       padding: 2px 8px;
       border-radius: 10px;
-      background: rgba(74, 158, 255, 0.2);
-      color: var(--accent-blue);
-    }
-    .source-tab.disconnected .source-tab-status {
-      background: rgba(248, 113, 113, 0.2);
-      color: var(--accent-red);
     }
 
-    /* Main content card */
-    .content-card {
+    /* Main content area - split layout */
+    .content-area {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      min-height: 500px;
+    }
+
+    .main-panel {
       background: var(--bg-card);
       border-radius: 16px;
-      overflow: hidden;
-      min-height: 400px;
-    }
-
-    /* Sub-tabs within each source */
-    .sub-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border-color);
-      background: var(--bg-secondary);
-    }
-    .sub-tab {
-      flex: 1;
-      padding: 14px 16px;
-      text-align: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.2s;
-      border-bottom: 2px solid transparent;
-    }
-    .sub-tab:hover {
-      color: var(--text-primary);
-      background: rgba(255,255,255,0.03);
-    }
-    .sub-tab.active {
-      color: var(--accent-blue);
-      border-bottom-color: var(--accent-blue);
-      background: rgba(74, 158, 255, 0.05);
-    }
-
-    /* Source panels (one for each source) */
-    .source-panel {
-      display: none;
-    }
-    .source-panel.active {
-      display: block;
-    }
-
-    /* Sub-tab content panels */
-    .sub-panel {
-      display: none;
       padding: 24px;
-      min-height: 300px;
-    }
-    .sub-panel.active {
-      display: block;
+      display: flex;
+      flex-direction: column;
     }
 
-    .summary-content {
-      line-height: 1.7;
-      color: var(--text-secondary);
-    }
-    .summary-content strong {
-      color: var(--text-primary);
+    .side-panel {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Markdown formatting */
-    .summary-h3 {
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
       font-size: 1.1rem;
       font-weight: 600;
       color: var(--text-primary);
-      margin: 20px 0 12px 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .summary-h3:first-child {
-      margin-top: 0;
-    }
-    .summary-h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--accent-blue);
-      margin: 16px 0 8px 0;
-    }
-    .summary-list {
-      margin: 8px 0;
-      padding-left: 20px;
-      list-style-type: disc;
-    }
-    .summary-list li {
-      margin: 6px 0;
-      line-height: 1.5;
-    }
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 0.9rem;
-    }
-    .summary-table th {
-      background: var(--bg-secondary);
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-primary);
-      border-bottom: 2px solid var(--border-color);
-    }
-    .summary-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .summary-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
     }
 
-    /* Topic tag styles */
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Date range badge */
+    .date-range {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    /* Summary content */
+    .summary-content {
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    .summary-section {
+      margin-bottom: 20px;
+    }
+
+    .summary-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-section-title .icon {
+      font-size: 1rem;
+    }
+
+    .chat-summary {
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .chat-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .chat-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .more-topics {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+
+    /* Topic tags */
     .topic-tag {
       display: inline;
       background: linear-gradient(135deg, rgba(74, 158, 255, 0.2), rgba(168, 85, 247, 0.2));
       border: 1px solid rgba(74, 158, 255, 0.4);
       color: var(--accent-blue);
-      padding: 1px 8px;
-      border-radius: 10px;
-      font-size: 0.82rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s ease;
-      white-space: nowrap;
     }
     .topic-tag:hover {
       background: linear-gradient(135deg, rgba(74, 158, 255, 0.35), rgba(168, 85, 247, 0.35));
       border-color: var(--accent-blue);
+    }
+
+    /* Action items */
+    .action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .action-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .action-item.completed {
+      opacity: 0.6;
+    }
+
+    .action-item.completed .action-text {
+      text-decoration: line-through;
+    }
+
+    .action-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all 0.2s;
+    }
+
+    .action-checkbox:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .action-checkbox.checked {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    .action-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .action-content {
+      flex: 1;
+    }
+
+    .action-text {
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .action-source {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Chat button */
+    .chat-button-container {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .chat-button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .chat-button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* Chat panel (hidden by default) */
+    .chat-panel {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+    }
+
+    .chat-panel.active {
+      display: block;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    .chat-send {
+      padding: 12px 20px;
+      background: var(--accent-blue);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .chat-response {
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--bg-card);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent-blue);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Loading & states */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-box {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .not-connected {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .not-connected-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
     }
 
     /* Topic modal */
@@ -240,24 +432,13 @@
       color: var(--text-muted);
       font-size: 1.5rem;
       cursor: pointer;
-      padding: 0;
-      line-height: 1;
-    }
-    .topic-modal-close:hover {
-      color: var(--text-primary);
     }
     .topic-modal-content {
       color: var(--text-secondary);
-      font-size: 0.9rem;
       line-height: 1.6;
     }
-    .topic-modal-loading {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-muted);
-    }
-    .topic-modal-loading .mini-spinner {
+
+    .mini-spinner {
       width: 16px;
       height: 16px;
       border: 2px solid var(--border-color);
@@ -266,203 +447,35 @@
       animation: spin 0.8s linear infinite;
     }
 
-    /* Q&A section */
-    .qa-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .qa-input-row {
-      display: flex;
-      gap: 12px;
-    }
-    .qa-input {
-      flex: 1;
-      padding: 14px 18px;
-      border-radius: 12px;
+    /* Refresh button */
+    .refresh-btn {
+      background: none;
       border: 1px solid var(--border-color);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 0.95rem;
-    }
-    .qa-input:focus {
-      outline: none;
-      border-color: var(--accent-blue);
-    }
-    .qa-submit {
-      padding: 14px 24px;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      border: none;
-      border-radius: 12px;
-      color: white;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-    .qa-submit:hover { opacity: 0.9; }
-    .qa-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .qa-answer {
-      padding: 20px;
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      border-left: 3px solid var(--accent-blue);
-    }
-    .qa-answer-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--accent-blue);
-    }
-    .qa-answer-text {
-      color: var(--text-secondary);
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
-    .suggested-questions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .suggested-q {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      cursor: pointer;
+      font-size: 0.8rem;
       transition: all 0.2s;
     }
-    .suggested-q:hover {
+
+    .refresh-btn:hover {
       border-color: var(--accent-blue);
       color: var(--accent-blue);
-    }
-
-    /* Loading & Error states */
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 40px;
-      color: var(--text-muted);
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border-color);
-      border-top-color: var(--accent-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .error-box {
-      background: rgba(248, 113, 113, 0.1);
-      border: 1px solid var(--accent-red);
-      color: var(--accent-red);
-      padding: 16px;
-      border-radius: 10px;
-    }
-    .not-connected {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-    .not-connected-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    /* Cache indicators */
-    .stale-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 0.85rem;
-      color: #fbbf24;
-    }
-    .stale-indicator .mini-spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(251, 191, 36, 0.3);
-      border-top-color: #fbbf24;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    .cache-info {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 12px;
-      opacity: 0.7;
-    }
-
-    /* Overview card */
-    .overview-card {
-      background: linear-gradient(135deg, var(--bg-card), rgba(74, 158, 255, 0.08));
-      border: 1px solid rgba(74, 158, 255, 0.2);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .overview-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .overview-icon {
-      font-size: 32px;
-    }
-    .overview-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .overview-subtitle {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-    .overview-content {
-      line-height: 1.8;
-      color: var(--text-secondary);
     }
   </style>
 </head>
 <body>
   <div class="dashboard-container">
-    <header class="app-header" style="margin-bottom: 24px;">
+    <header class="app-header" style="margin-bottom: 20px;">
       <div class="navbar">
         <h1>MyBrain</h1>
         <div class="nav-links">
-          <button class="btn btn-sm btn-secondary" onclick="refreshAll()" title="Refresh all data">Refresh</button>
+          <button class="btn btn-sm btn-secondary" onclick="refreshAll()">Refresh All</button>
           <button class="btn btn-sm btn-secondary" onclick="goToSettings()">Settings</button>
         </div>
       </div>
     </header>
-
-    <!-- Today at a Glance - Combined Summary -->
-    <div class="overview-card" id="overview-section">
-      <div class="overview-header">
-        <span class="overview-icon">🧠</span>
-        <div>
-          <div class="overview-title">Today at a Glance</div>
-          <div class="overview-subtitle">AI-powered summary from all your connected sources</div>
-        </div>
-        <button class="btn btn-sm btn-secondary" style="margin-left: auto;" onclick="loadCombinedSummary(true)">Refresh</button>
-      </div>
-      <div class="overview-content" id="overview-content">
-        <div class="loading-container" style="padding: 30px;">
-          <div class="spinner"></div>
-          <span>Generating your daily overview...</span>
-        </div>
-      </div>
-    </div>
 
     <!-- Top-level Source Tabs -->
     <div class="source-tabs">
@@ -483,113 +496,62 @@
       </div>
     </div>
 
-    <!-- Main Content Card -->
-    <div class="content-card">
-      <!-- WhatsApp Panel -->
-      <div class="source-panel active" id="panel-whatsapp">
-        <div class="sub-tabs">
-          <div class="sub-tab active" onclick="switchSubTab('whatsapp', 'today')">Today</div>
-          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'week')">This Week</div>
-          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'actions')">Action Items</div>
-          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'ask')">Ask AI</div>
+    <!-- Main Content Area -->
+    <div class="content-area">
+      <!-- Left Panel - Overview -->
+      <div class="main-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Overview</div>
+            <div class="panel-subtitle" id="date-range-display">Loading...</div>
+          </div>
+          <button class="refresh-btn" onclick="refreshCurrentSource()">↻ Refresh</button>
         </div>
-        <div class="sub-panel active" id="whatsapp-today">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        <div class="panel-content" id="overview-content">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <span>Loading overview...</span>
+          </div>
         </div>
-        <div class="sub-panel" id="whatsapp-week">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
-        </div>
-        <div class="sub-panel" id="whatsapp-actions">
-          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
-        </div>
-        <div class="sub-panel" id="whatsapp-ask">
-          <div class="qa-container">
-            <div class="qa-input-row">
-              <input type="text" class="qa-input" id="whatsapp-question" placeholder="Ask anything about your WhatsApp chats...">
-              <button class="qa-submit" onclick="askQuestion('whatsapp')">Ask</button>
+
+        <!-- Chat Button & Panel -->
+        <div class="chat-button-container">
+          <button class="chat-button" onclick="toggleChat()">
+            <span>💬</span>
+            <span>Ask AI about your data</span>
+          </button>
+          <div class="chat-panel" id="chat-panel">
+            <div class="chat-input-row">
+              <input type="text" class="chat-input" id="chat-input" placeholder="Ask anything...">
+              <button class="chat-send" onclick="sendChat()">Send</button>
             </div>
-            <div class="suggested-questions">
-              <span class="suggested-q" onclick="askSuggested('whatsapp', 'What are the groups discussing?')">Group topics</span>
-              <span class="suggested-q" onclick="askSuggested('whatsapp', 'Any messages I should reply to?')">Need to reply</span>
-              <span class="suggested-q" onclick="askSuggested('whatsapp', 'Who has been most active?')">Most active</span>
-            </div>
-            <div id="whatsapp-answer"></div>
+            <div id="chat-response"></div>
           </div>
         </div>
       </div>
 
-      <!-- Gmail Panel -->
-      <div class="source-panel" id="panel-gmail">
-        <div class="sub-tabs">
-          <div class="sub-tab active" onclick="switchSubTab('gmail', 'today')">Today</div>
-          <div class="sub-tab" onclick="switchSubTab('gmail', 'week')">This Week</div>
-          <div class="sub-tab" onclick="switchSubTab('gmail', 'actions')">Action Items</div>
-          <div class="sub-tab" onclick="switchSubTab('gmail', 'ask')">Ask AI</div>
-        </div>
-        <div class="sub-panel active" id="gmail-today">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
-        </div>
-        <div class="sub-panel" id="gmail-week">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
-        </div>
-        <div class="sub-panel" id="gmail-actions">
-          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
-        </div>
-        <div class="sub-panel" id="gmail-ask">
-          <div class="qa-container">
-            <div class="qa-input-row">
-              <input type="text" class="qa-input" id="gmail-question" placeholder="Ask anything about your emails...">
-              <button class="qa-submit" onclick="askQuestion('gmail')">Ask</button>
-            </div>
-            <div class="suggested-questions">
-              <span class="suggested-q" onclick="askSuggested('gmail', 'What emails need my attention?')">What needs attention?</span>
-              <span class="suggested-q" onclick="askSuggested('gmail', 'Who emailed me the most?')">Top senders</span>
-              <span class="suggested-q" onclick="askSuggested('gmail', 'Any important deadlines?')">Deadlines</span>
-            </div>
-            <div id="gmail-answer"></div>
+      <!-- Right Panel - Action Items -->
+      <div class="side-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Action Items</div>
+            <div class="panel-subtitle">Tasks & follow-ups</div>
           </div>
         </div>
-      </div>
-
-      <!-- Notion Panel -->
-      <div class="source-panel" id="panel-notion">
-        <div class="sub-tabs">
-          <div class="sub-tab active" onclick="switchSubTab('notion', 'today')">Today</div>
-          <div class="sub-tab" onclick="switchSubTab('notion', 'week')">This Week</div>
-          <div class="sub-tab" onclick="switchSubTab('notion', 'actions')">Action Items</div>
-          <div class="sub-tab" onclick="switchSubTab('notion', 'ask')">Ask AI</div>
-        </div>
-        <div class="sub-panel active" id="notion-today">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
-        </div>
-        <div class="sub-panel" id="notion-week">
-          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
-        </div>
-        <div class="sub-panel" id="notion-actions">
-          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
-        </div>
-        <div class="sub-panel" id="notion-ask">
-          <div class="qa-container">
-            <div class="qa-input-row">
-              <input type="text" class="qa-input" id="notion-question" placeholder="Ask anything about your Notion...">
-              <button class="qa-submit" onclick="askQuestion('notion')">Ask</button>
-            </div>
-            <div class="suggested-questions">
-              <span class="suggested-q" onclick="askSuggested('notion', 'What are the themes in My Journey?')">Journey themes</span>
-              <span class="suggested-q" onclick="askSuggested('notion', 'What did I work on recently?')">Recent work</span>
-              <span class="suggested-q" onclick="askSuggested('notion', 'What databases do I have?')">My databases</span>
-            </div>
-            <div id="notion-answer"></div>
+        <div class="panel-content" id="action-items-content">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <span>Finding action items...</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.8rem;">
+    <div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 0.75rem;">
       Last updated: <span id="last-updated">-</span>
     </div>
 
-    <!-- Topic Details Modal -->
+    <!-- Topic Modal -->
     <div id="topic-modal-container" style="display: none;">
       <div class="topic-modal-overlay" onclick="closeTopicModal()"></div>
       <div class="topic-modal">
@@ -597,37 +559,29 @@
           <span class="topic-modal-title" id="topic-modal-title">Topic</span>
           <button class="topic-modal-close" onclick="closeTopicModal()">&times;</button>
         </div>
-        <div class="topic-modal-content" id="topic-modal-content">
-          <div class="topic-modal-loading">
-            <div class="mini-spinner"></div>
-            <span>Getting details...</span>
-          </div>
-        </div>
+        <div class="topic-modal-content" id="topic-modal-content"></div>
       </div>
     </div>
   </div>
 
   <script>
     let connectionStatus = { gmail: false, whatsapp: false, notion: false };
-    let loadedContent = {
-      gmail: { today: false, week: false, actions: false },
-      whatsapp: { today: false, week: false, actions: false },
-      notion: { today: false, week: false, actions: false }
-    };
-    let claudeConfigured = false;
     let currentSource = 'whatsapp';
-    let combinedLoaded = false;
+    let claudeConfigured = false;
+    let actionItemsState = {}; // Track completed action items
+
+    // Load saved action items state
+    const savedState = localStorage.getItem('actionItemsState');
+    if (savedState) {
+      actionItemsState = JSON.parse(savedState);
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       await checkClaudeStatus();
       await checkConnectionStatus();
 
-      // Set up enter key handlers for question inputs
-      ['gmail', 'whatsapp', 'notion'].forEach(source => {
-        const input = document.getElementById(`${source}-question`);
-        input.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') askQuestion(source);
-        });
+      document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChat();
       });
 
       document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
@@ -646,32 +600,20 @@
         notion: status.notion
       };
 
-      // Update tab statuses
       updateTabStatus('whatsapp', status.whatsapp);
       updateTabStatus('gmail', status.gmail);
       updateTabStatus('notion', status.notion);
 
-      // Load summaries for connected sources
-      if (claudeConfigured) {
-        if (status.whatsapp) loadTodaySummary('whatsapp');
-        if (status.gmail) loadTodaySummary('gmail');
-        if (status.notion) loadTodaySummary('notion');
-
-        if (status.gmail || status.whatsapp || status.notion) {
-          loadCombinedSummary();
-        } else {
-          showOverviewNotConnected();
-        }
+      // Load first connected source
+      if (status.whatsapp) {
+        loadSourceData('whatsapp');
+      } else if (status.gmail) {
+        switchSource('gmail');
+      } else if (status.notion) {
+        switchSource('notion');
       } else {
-        showOverviewNeedsClaude();
+        showNotConnected();
       }
-
-      // Show not connected state for disconnected sources
-      ['whatsapp', 'gmail', 'notion'].forEach(source => {
-        if (!connectionStatus[source]) {
-          showSourceNotConnected(source);
-        }
-      });
     }
 
     function updateTabStatus(source, connected) {
@@ -680,388 +622,217 @@
 
       if (connected) {
         tab.classList.remove('disconnected');
-        statusEl.textContent = 'Connected';
-        statusEl.style.background = 'rgba(34, 197, 94, 0.2)';
+        statusEl.textContent = '●';
         statusEl.style.color = 'var(--accent-green)';
       } else {
         tab.classList.add('disconnected');
-        statusEl.textContent = 'Not connected';
-        statusEl.style.background = 'rgba(248, 113, 113, 0.2)';
-        statusEl.style.color = 'var(--accent-red)';
+        statusEl.textContent = '○';
+        statusEl.style.color = 'var(--text-muted)';
       }
     }
 
     function switchSource(source) {
       currentSource = source;
 
-      // Update tabs
       document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
       document.getElementById(`tab-${source}`).classList.add('active');
 
-      // Update panels
-      document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(`panel-${source}`).classList.add('active');
-
-      // Load today's summary if not loaded and connected
-      if (connectionStatus[source] && claudeConfigured && !loadedContent[source].today) {
-        loadTodaySummary(source);
+      if (connectionStatus[source] && claudeConfigured) {
+        loadSourceData(source);
+      } else if (!connectionStatus[source]) {
+        showNotConnected();
+      } else {
+        showNeedsClaude();
       }
     }
 
-    function switchSubTab(source, tab) {
-      // Update sub-tab buttons
-      const panel = document.getElementById(`panel-${source}`);
-      panel.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+    function showNotConnected() {
+      const icon = currentSource === 'gmail' ? '📧' : currentSource === 'whatsapp' ? '💬' : '📝';
+      const name = currentSource.charAt(0).toUpperCase() + currentSource.slice(1);
 
-      // Update sub-panels
-      panel.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(`${source}-${tab}`).classList.add('active');
-
-      // Load content if needed
-      if (!connectionStatus[source] || !claudeConfigured) return;
-
-      if (tab === 'today' && !loadedContent[source].today) {
-        loadTodaySummary(source);
-      } else if (tab === 'week' && !loadedContent[source].week) {
-        loadWeekSummary(source);
-      } else if (tab === 'actions' && !loadedContent[source].actions) {
-        loadActionItems(source);
-      }
-    }
-
-    function showSourceNotConnected(source) {
-      ['today', 'week', 'actions', 'ask'].forEach(tab => {
-        const panel = document.getElementById(`${source}-${tab}`);
-        const icon = source === 'gmail' ? '📧' : source === 'whatsapp' ? '💬' : '📝';
-        panel.innerHTML = `
-          <div class="not-connected">
-            <div class="not-connected-icon">${icon}</div>
-            <p>${source.charAt(0).toUpperCase() + source.slice(1)} not connected</p>
-            <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
-              Connect ${source.charAt(0).toUpperCase() + source.slice(1)}
-            </button>
-          </div>
-        `;
-      });
-    }
-
-    function showOverviewNotConnected() {
       document.getElementById('overview-content').innerHTML = `
-        <div class="not-connected" style="padding: 20px;">
-          <div class="not-connected-icon">🔗</div>
-          <p>Connect at least one data source to see your daily overview</p>
-          <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
-            Go to Settings
-          </button>
+        <div class="not-connected">
+          <div class="not-connected-icon">${icon}</div>
+          <p>${name} not connected</p>
+          <button class="btn btn-primary btn-sm" style="margin-top: 12px;" onclick="goToSettings()">Connect ${name}</button>
         </div>
       `;
+      document.getElementById('action-items-content').innerHTML = '<div class="empty-state">Connect to see action items</div>';
+      document.getElementById('date-range-display').textContent = 'Not connected';
     }
 
-    function showOverviewNeedsClaude() {
+    function showNeedsClaude() {
       document.getElementById('overview-content').innerHTML = `
-        <div class="not-connected" style="padding: 20px;">
+        <div class="not-connected">
           <div class="not-connected-icon">🔑</div>
-          <p>Claude API key required for AI summaries</p>
-          <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
-            Configure in Settings
-          </button>
+          <p>Claude API key required</p>
+          <button class="btn btn-primary btn-sm" style="margin-top: 12px;" onclick="goToSettings()">Configure</button>
         </div>
       `;
+      document.getElementById('action-items-content').innerHTML = '';
     }
 
-    async function loadTodaySummary(source, forceRefresh = false) {
-      const panel = document.getElementById(`${source}-today`);
-      if (forceRefresh || !loadedContent[source].today) {
-        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Generating today\'s summary...</span></div>';
-      }
+    async function loadSourceData(source, forceRefresh = false) {
+      // Load overview
+      document.getElementById('overview-content').innerHTML = `
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <span>Generating overview...</span>
+        </div>
+      `;
 
-      try {
-        const result = await window.api.getTodaySummary(source, forceRefresh);
-        if (result.error) {
-          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
+      // Load action items
+      document.getElementById('action-items-content').innerHTML = `
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <span>Finding action items...</span>
+        </div>
+      `;
+
+      // Fetch both in parallel
+      const [summaryResult, actionsResult] = await Promise.all([
+        window.api.getTodaySummary(source, forceRefresh),
+        window.api.getActionItems(source, forceRefresh)
+      ]);
+
+      // Render overview
+      if (summaryResult.error) {
+        document.getElementById('overview-content').innerHTML = `<div class="error-box">${summaryResult.error}</div>`;
+      } else {
+        document.getElementById('overview-content').innerHTML = formatOverview(summaryResult.summary);
+        if (summaryResult.dateRange) {
+          document.getElementById('date-range-display').textContent = summaryResult.dateRange;
         } else {
-          panel.innerHTML = renderSummaryWithCache(result.summary, result);
-          loadedContent[source].today = true;
-          if (result.isStale) pollForFreshData(source, 'today', 'getTodaySummary');
+          document.getElementById('date-range-display').textContent = 'Recent messages';
         }
-      } catch (error) {
-        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+
+      // Render action items
+      if (actionsResult.error) {
+        document.getElementById('action-items-content').innerHTML = `<div class="error-box">${actionsResult.error}</div>`;
+      } else {
+        renderActionItems(actionsResult.actionItems, source);
       }
     }
 
-    async function loadWeekSummary(source, forceRefresh = false) {
-      const panel = document.getElementById(`${source}-week`);
-      if (forceRefresh || !loadedContent[source].week) {
-        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Generating this week\'s summary...</span></div>';
-      }
+    function formatOverview(text) {
+      if (!text) return '<div class="empty-state">No data available</div>';
 
-      try {
-        const result = await window.api.getWeekSummary(source, forceRefresh);
-        if (result.error) {
-          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
-        } else {
-          panel.innerHTML = renderSummaryWithCache(result.summary, result);
-          loadedContent[source].week = true;
-          if (result.isStale) pollForFreshData(source, 'week', 'getWeekSummary');
-        }
-      } catch (error) {
-        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
-      }
-    }
-
-    async function loadActionItems(source, forceRefresh = false) {
-      const panel = document.getElementById(`${source}-actions`);
-      if (forceRefresh || !loadedContent[source].actions) {
-        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Identifying action items...</span></div>';
-      }
-
-      try {
-        const result = await window.api.getActionItems(source, forceRefresh);
-        if (result.error) {
-          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
-        } else {
-          panel.innerHTML = renderSummaryWithCache(result.actionItems, result);
-          loadedContent[source].actions = true;
-          if (result.isStale) pollForFreshData(source, 'actions', 'getActionItems');
-        }
-      } catch (error) {
-        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
-      }
-    }
-
-    async function loadCombinedSummary(forceRefresh = false) {
-      const content = document.getElementById('overview-content');
-      if (forceRefresh || !combinedLoaded) {
-        content.innerHTML = '<div class="loading-container" style="padding: 30px;"><div class="spinner"></div><span>Generating your daily overview...</span></div>';
-      }
-
-      try {
-        const result = await window.api.getCombinedSummary(forceRefresh);
-        if (result.error) {
-          content.innerHTML = `<div class="error-box">${result.error}</div>`;
-        } else {
-          let html = '';
-          if (result.isStale) {
-            html += `
-              <div class="stale-indicator">
-                <div class="mini-spinner"></div>
-                <span>Updating... showing cached data from ${formatCacheAge(result.cacheAge)}</span>
-              </div>
-            `;
-          }
-          html += `<div class="summary-content">${formatSummary(result.summary)}</div>`;
-          if (result.fromCache && !result.isStale && result.cacheAge) {
-            html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
-          }
-          content.innerHTML = html;
-          combinedLoaded = true;
-          if (result.isStale) pollForCombinedRefresh();
-        }
-      } catch (error) {
-        content.innerHTML = `<div class="error-box">${error.message}</div>`;
-      }
-    }
-
-    async function askQuestion(source) {
-      const input = document.getElementById(`${source}-question`);
-      const question = input.value.trim();
-      if (!question) return;
-
-      const answerDiv = document.getElementById(`${source}-answer`);
-      answerDiv.innerHTML = '<div class="loading-container" style="padding: 20px;"><div class="spinner"></div><span>Thinking...</span></div>';
-
-      try {
-        const result = await window.api.askQuestion(source, question);
-        if (result.error) {
-          answerDiv.innerHTML = `<div class="error-box">${result.error}</div>`;
-        } else {
-          answerDiv.innerHTML = `
-            <div class="qa-answer">
-              <div class="qa-answer-title">Answer</div>
-              <div class="qa-answer-text">${formatSummary(result.answer)}</div>
-            </div>
-          `;
-        }
-      } catch (error) {
-        answerDiv.innerHTML = `<div class="error-box">${error.message}</div>`;
-      }
-    }
-
-    function askSuggested(source, question) {
-      document.getElementById(`${source}-question`).value = question;
-      askQuestion(source);
-    }
-
-    function formatSummary(text) {
-      if (!text) return '';
       let html = text;
 
-      // Topic tags [[Topic]]
-      html = html.replace(/\[\[([^\]]+?)(?:::([^\]]+))?\]\]/g, (match, topic) => {
+      // Convert topic tags [[Topic]] to clickable elements
+      html = html.replace(/\[\[([^\]]+)\]\]/g, (match, topic) => {
         const escapedTopic = topic.trim().replace(/"/g, '&quot;');
         return `<span class="topic-tag" onclick="showTopicDetails('${escapedTopic}')">${escapedTopic}</span>`;
       });
 
-      // Tables
-      html = html.replace(/\|(.+)\|\n\|[-:\s|]+\|\n((?:\|.+\|\n?)+)/g, (match, header, body) => {
-        const headers = header.split('|').filter(h => h.trim()).map(h => `<th>${h.trim()}</th>`).join('');
-        const rows = body.trim().split('\n').map(row => {
-          const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
-          return `<tr>${cells}</tr>`;
-        }).join('');
-        return `<table class="summary-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
-      });
-
-      // Headers
-      html = html.replace(/^### (.+)$/gm, '<h4 class="summary-h4">$1</h4>');
-      html = html.replace(/^## (.+)$/gm, '<h3 class="summary-h3">$1</h3>');
-
-      // Bold
+      // Convert **bold** to <strong>
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-      // Lists
-      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-      html = html.replace(/(<li>.+<\/li>\n?)+/g, '<ul class="summary-list">$&</ul>');
-      html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+      // Convert line breaks
+      html = html.replace(/\n/g, '<br>');
 
-      // Line breaks
-      html = html.replace(/\n(?!<)/g, '<br>');
-      html = html.replace(/<\/(h3|h4|table|ul|ol)><br>/g, '</$1>');
-      html = html.replace(/<br><(h3|h4|table|ul)/g, '<$1');
-
-      return html;
+      return `<div class="summary-content">${html}</div>`;
     }
 
-    function formatCacheAge(ageMs) {
-      const minutes = Math.floor(ageMs / 60000);
-      if (minutes < 60) return `${minutes}m ago`;
-      const hours = Math.floor(minutes / 60);
-      const remainingMins = minutes % 60;
-      return remainingMins > 0 ? `${hours}h ${remainingMins}m ago` : `${hours}h ago`;
-    }
-
-    function renderSummaryWithCache(summary, result) {
-      let html = '';
-      if (result.isStale) {
-        html += `
-          <div class="stale-indicator">
-            <div class="mini-spinner"></div>
-            <span>Updating... showing cached data from ${formatCacheAge(result.cacheAge)}</span>
+    function renderActionItems(text, source) {
+      if (!text || text.trim() === '' || text.includes('No action items')) {
+        document.getElementById('action-items-content').innerHTML = `
+          <div class="empty-state">
+            <p>No action items found</p>
           </div>
         `;
+        return;
       }
-      html += `<div class="summary-content">${formatSummary(summary)}</div>`;
-      if (result.fromCache && !result.isStale && result.cacheAge) {
-        html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
+
+      // Parse action items - each line starting with - or * or number
+      const lines = text.split('\n').filter(line => line.trim());
+      const items = [];
+
+      for (const line of lines) {
+        const cleaned = line.replace(/^[\-\*\d\.]+\s*/, '').trim();
+        if (cleaned && cleaned.length > 5) {
+          items.push(cleaned);
+        }
       }
-      return html;
+
+      if (items.length === 0) {
+        document.getElementById('action-items-content').innerHTML = `
+          <div class="empty-state">
+            <p>No action items found</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      items.forEach((item, index) => {
+        const itemId = `${source}-${index}-${item.substring(0, 20).replace(/\s/g, '-')}`;
+        const isCompleted = actionItemsState[itemId] || false;
+
+        html += `
+          <div class="action-item ${isCompleted ? 'completed' : ''}" data-id="${itemId}">
+            <div class="action-checkbox ${isCompleted ? 'checked' : ''}" onclick="toggleActionItem('${itemId}', this)"></div>
+            <div class="action-content">
+              <div class="action-text">${item}</div>
+              <div class="action-source">${source}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('action-items-content').innerHTML = html;
     }
 
-    async function pollForFreshData(source, tab, apiMethod) {
-      let attempts = 0;
-      const maxAttempts = 20;
+    function toggleActionItem(itemId, element) {
+      const item = element.closest('.action-item');
+      const isCompleted = !actionItemsState[itemId];
 
-      const poll = async () => {
-        attempts++;
-        if (attempts > maxAttempts) return;
+      actionItemsState[itemId] = isCompleted;
+      localStorage.setItem('actionItemsState', JSON.stringify(actionItemsState));
 
-        try {
-          let result;
-          if (apiMethod === 'getTodaySummary') result = await window.api.getTodaySummary(source);
-          else if (apiMethod === 'getWeekSummary') result = await window.api.getWeekSummary(source);
-          else if (apiMethod === 'getActionItems') result = await window.api.getActionItems(source);
-
-          if (result && !result.isStale && !result.error) {
-            const panel = document.getElementById(`${source}-${tab}`);
-            const dataKey = apiMethod === 'getActionItems' ? 'actionItems' : 'summary';
-            panel.innerHTML = renderSummaryWithCache(result[dataKey], result);
-          } else if (result && result.isStale) {
-            setTimeout(poll, 3000);
-          }
-        } catch (e) {
-          console.error('Poll error:', e);
-        }
-      };
-
-      setTimeout(poll, 3000);
+      element.classList.toggle('checked', isCompleted);
+      item.classList.toggle('completed', isCompleted);
     }
 
-    async function pollForCombinedRefresh() {
-      let attempts = 0;
-      const maxAttempts = 20;
+    function toggleChat() {
+      const panel = document.getElementById('chat-panel');
+      panel.classList.toggle('active');
+      if (panel.classList.contains('active')) {
+        document.getElementById('chat-input').focus();
+      }
+    }
 
-      const poll = async () => {
-        attempts++;
-        if (attempts > maxAttempts) return;
+    async function sendChat() {
+      const input = document.getElementById('chat-input');
+      const question = input.value.trim();
+      if (!question) return;
 
-        try {
-          const result = await window.api.getCombinedSummary();
-          if (result && !result.isStale && !result.error) {
-            const content = document.getElementById('overview-content');
-            let html = `<div class="summary-content">${formatSummary(result.summary)}</div>`;
-            if (result.fromCache && result.cacheAge) {
-              html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
-            }
-            content.innerHTML = html;
-          } else if (result && result.isStale) {
-            setTimeout(poll, 3000);
-          }
-        } catch (e) {
-          console.error('Combined poll error:', e);
+      const responseDiv = document.getElementById('chat-response');
+      responseDiv.innerHTML = '<div style="display: flex; align-items: center; gap: 8px;"><div class="mini-spinner"></div> Thinking...</div>';
+
+      try {
+        const result = await window.api.askQuestion(currentSource, question);
+        if (result.error) {
+          responseDiv.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          responseDiv.innerHTML = `<div class="chat-response">${formatOverview(result.answer)}</div>`;
         }
-      };
+      } catch (error) {
+        responseDiv.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
 
-      setTimeout(poll, 3000);
+    async function refreshCurrentSource() {
+      if (connectionStatus[currentSource] && claudeConfigured) {
+        loadSourceData(currentSource, true);
+      }
     }
 
     async function refreshAll() {
-      loadedContent = {
-        gmail: { today: false, week: false, actions: false },
-        whatsapp: { today: false, week: false, actions: false },
-        notion: { today: false, week: false, actions: false }
-      };
-      combinedLoaded = false;
-
-      await checkClaudeStatus();
-      const status = await window.api.getSetupStatus();
-      connectionStatus = { gmail: status.gmail, whatsapp: status.whatsapp, notion: status.notion };
-
-      updateTabStatus('whatsapp', status.whatsapp);
-      updateTabStatus('gmail', status.gmail);
-      updateTabStatus('notion', status.notion);
-
-      if (claudeConfigured) {
-        const sources = [];
-        if (status.whatsapp) sources.push('whatsapp');
-        if (status.gmail) sources.push('gmail');
-        if (status.notion) sources.push('notion');
-
-        for (const source of sources) {
-          loadTodaySummary(source, true);
-          loadWeekSummary(source, true);
-          loadActionItems(source, true);
-        }
-
-        if (sources.length > 0) loadCombinedSummary(true);
-      }
-
+      await checkConnectionStatus();
       document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
     }
-
-    // Auto-refresh
-    const AUTO_REFRESH_INTERVAL = 2 * 60 * 60 * 1000;
-    let lastRefreshTime = Date.now();
-
-    function checkAutoRefresh() {
-      if (Date.now() - lastRefreshTime > AUTO_REFRESH_INTERVAL) {
-        lastRefreshTime = Date.now();
-        refreshAll();
-      }
-    }
-
-    setInterval(checkAutoRefresh, 5 * 60 * 1000);
-    window.addEventListener('focus', checkAutoRefresh);
 
     function goToSettings() {
       window.api.navigateTo('setup');
@@ -1074,12 +845,7 @@
       const content = document.getElementById('topic-modal-content');
 
       title.textContent = topic;
-      content.innerHTML = `
-        <div class="topic-modal-loading">
-          <div class="mini-spinner"></div>
-          <span>Getting details from Claude...</span>
-        </div>
-      `;
+      content.innerHTML = '<div style="display: flex; align-items: center; gap: 8px;"><div class="mini-spinner"></div> Getting details...</div>';
       container.style.display = 'block';
 
       try {
@@ -1090,7 +856,7 @@
           content.innerHTML = `<div style="line-height: 1.6;">${result.details}</div>`;
         }
       } catch (error) {
-        content.innerHTML = `<div class="error-box">Failed to load details: ${error.message}</div>`;
+        content.innerHTML = `<div class="error-box">${error.message}</div>`;
       }
     }
 

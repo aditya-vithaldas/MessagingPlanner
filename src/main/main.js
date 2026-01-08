@@ -83,9 +83,10 @@ function createWindow() {
 }
 
 // Initialize services
-function initializeServices() {
+async function initializeServices() {
   // Initialize database first - shared across all services
   databaseService = new DatabaseService();
+  await databaseService.ready; // Wait for sql.js to initialize
 
   claudeService = new ClaudeService(store);
   gmailService = new GmailService(store, mainWindow, databaseService);
@@ -95,9 +96,9 @@ function initializeServices() {
   console.log('All services initialized with database support');
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
-  initializeServices();
+  await initializeServices();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -273,6 +274,8 @@ ipcMain.handle('get-today-summary', async (event, type, forceRefresh = false) =>
 async function refreshTodaySummary(type) {
   try {
     let data;
+    let dateRange = null;
+
     switch (type) {
       case 'gmail':
         data = await gmailService.getSummary();
@@ -280,6 +283,13 @@ async function refreshTodaySummary(type) {
       case 'whatsapp':
         // Use today-filtered data for WhatsApp
         data = await whatsappService.getTodaySummary();
+        // Calculate date range from messages
+        if (data.messages && data.messages.length > 0) {
+          const timestamps = data.messages.map(m => m.timestamp);
+          const oldest = Math.min(...timestamps);
+          const newest = Math.max(...timestamps);
+          dateRange = formatDateRange(oldest, newest);
+        }
         break;
       case 'notion':
         data = await notionService.getSummary();
@@ -294,10 +304,40 @@ async function refreshTodaySummary(type) {
 
     const summary = await claudeService.generateTodaySummary(data, type);
     setCachedSummary(type, 'today', summary);
-    return { summary, fromCache: false };
+    return { summary, fromCache: false, dateRange };
   } catch (error) {
     console.error('Today summary error:', error);
     return { error: error.message };
+  }
+}
+
+function formatDateRange(oldestTimestamp, newestTimestamp) {
+  const oldest = new Date(oldestTimestamp * 1000);
+  const newest = new Date(newestTimestamp * 1000);
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const oldestDate = formatDate(oldest);
+  const newestDate = formatDate(newest);
+
+  if (oldestDate === newestDate) {
+    return `${oldestDate}, ${formatTime(oldest)} - ${formatTime(newest)}`;
+  } else {
+    return `${formatDate(oldest)} ${formatTime(oldest)} - ${formatDate(newest)} ${formatTime(newest)}`;
   }
 }
 

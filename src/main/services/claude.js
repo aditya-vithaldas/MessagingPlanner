@@ -58,68 +58,46 @@ class ClaudeService {
 
   async generateTodaySummary(data, type) {
     const prompts = {
-      gmail: `Summarize today's emails in this format:
+      gmail: `Summarize today's emails concisely:
 
 **Overview**: X emails today, mostly from [top 2-3 senders]. Y need your attention.
 
 **Needs Action**:
 - **Sender Name** - Subject: Brief 1-line context of what they need
-- **Sender Name** - Subject: What action is required
-
-Example:
-**Overview**: 12 emails today, mostly from Amazon, LinkedIn, and John. 2 need your attention.
-
-**Needs Action**:
-- **John Smith** - Project Deadline: Asking for your review on the proposal by Friday
-- **HR Team** - Benefits Enrollment: Need to select health plan by Dec 15
 
 RULES:
-- NO tables
-- NO category breakdowns
-- NO "key senders" section
+- NO tables or category breakdowns
 - Only list emails that actually need a response/action
-- Each action item needs specific context (what do they want?)
 - If no emails need action, say "Nothing urgent today"`,
 
-      whatsapp: `Write a brief 2-3 line summary for each active chat TODAY. Make important keywords clickable with [[keyword]].
+      whatsapp: `Summarize each chat in ONE sentence. Format important topics as [[clickable]] with count if there are more.
 
-Format:
-**Group/Contact Name**
-Natural summary sentence with [[clickable topic]] embedded. Another sentence if needed.
+Format for EACH chat:
+**Chat Name** discusses [[main topic]] and [[second topic]], and 3 more topics.
 
-Example:
-**Family Fun Chat**
-Planning [[Dad's birthday]] this Saturday - Mom suggested the Italian place, waiting for confirmation. Also shared photos from [[last year's trip]] to Goa, everyone feeling nostalgic.
+Examples:
+**Family Fun Chat** discusses [[Tanushree's birthday party]] and how much fun everyone had, plus [[upcoming Goa trip]] planning, and 4 more topics.
 
-**Work Team**
-[[Product launch]] confirmed for Monday 10am. Client loved the [[demo]] but wants the blue changed to green.
+**Work Team** discusses [[product launch]] timeline for Monday and [[client feedback]] on the demo, and 2 more topics.
 
-**Sarah**
-Catching up about her [[new job]] - she started last week and loves it. Making plans for [[coffee]] next Thursday.
+**Sarah** caught up about her [[new job]] at Google and plans for [[coffee next Thursday]].
 
 RULES:
-- Write natural sentences, NOT bullet points of keywords
-- Only make 2-3 important/recurring things clickable per chat
-- NO keyword dumps like "talked about love, life, work, food"
-- NO generic words like "chilling", "random", "stuff"
-- The summary should make sense even without clicking anything
-- Skip chats with nothing meaningful (just "ok", "haha", etc.)`,
+- ONE sentence per chat max
+- First 1-2 topics as [[clickable]] with brief context
+- End with "and X more topics" if there are more
+- NO keyword dumps like "discussed love, life, happiness"
+- NO generic words - be specific about what was discussed
+- Skip chats with nothing meaningful`,
 
-      notion: `Based on today's Notion activity, provide a well-formatted summary using this structure:
+      notion: `Summarize today's Notion activity briefly:
 
-## 📝 Overview
-A 1-2 sentence overview of today's workspace activity.
+**Overview**: X pages edited today.
 
-## ✏️ Recently Edited
-- List of pages edited with brief descriptions
+**Recent Activity**:
+- Page name: Brief description of what was added/changed
 
-## 🌟 My Journey Highlights
-Key themes or entries from the "My Journey" database (if present).
-
-## 💡 Key Insights
-Notable patterns or themes from your entries.
-
-Keep it concise but well-organized. Use markdown formatting.`
+Keep it concise.`
     };
 
     return this.summarize(data, type, prompts[type], true); // Use Sonnet for daily summaries
