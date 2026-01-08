@@ -70,25 +70,30 @@ RULES:
 - Only list emails that actually need a response/action
 - If no emails need action, say "Nothing urgent today"`,
 
-      whatsapp: `Summarize each chat in ONE sentence. Format important topics as [[clickable]] with count if there are more.
+      whatsapp: `Write a natural 2-3 sentence summary for each active chat. Wrap key topics in [[double brackets]] so they become interactive.
 
-Format for EACH chat:
-**Chat Name** discusses [[main topic]] and [[second topic]], and 3 more topics.
+Format:
+**Chat Name**
+Natural flowing sentences describing what was discussed. Include specific details like names, dates, decisions.
 
 Examples:
-**Family Fun Chat** discusses [[Tanushree's birthday party]] and how much fun everyone had, plus [[upcoming Goa trip]] planning, and 4 more topics.
 
-**Work Team** discusses [[product launch]] timeline for Monday and [[client feedback]] on the demo, and 2 more topics.
+**Family Fun Chat**
+Everyone wished Tanushree happy birthday and shared memories from [[her party]] last weekend. Mom suggested getting [[a gold necklace]] as a gift and most people agreed. Dad mentioned planning a [[Goa trip]] for February.
 
-**Sarah** caught up about her [[new job]] at Google and plans for [[coffee next Thursday]].
+**Work Team**
+The [[product launch]] is confirmed for Monday at 10am. Sarah presented the [[client demo]] and they loved it but want the header color changed to blue.
+
+**Priya**
+Caught up after a long time - she got [[promoted to Senior Manager]] at Deloitte! Planning to meet for [[dinner at the new Italian place]] next Saturday.
 
 RULES:
-- ONE sentence per chat max
-- First 1-2 topics as [[clickable]] with brief context
-- End with "and X more topics" if there are more
-- NO keyword dumps like "discussed love, life, happiness"
-- NO generic words - be specific about what was discussed
-- Skip chats with nothing meaningful`,
+- Write naturally like you're telling a friend what happened
+- Include WHO said WHAT and any DECISIONS made
+- Wrap 2-4 important topics per chat in [[brackets]] - these become interactive
+- NO "they discussed X" or "there was discussion about X" - just state what happened
+- NO generic summaries - be specific with names, places, dates
+- Skip chats with only greetings or "ok/haha" messages`,
 
       notion: `Summarize today's Notion activity briefly:
 
@@ -133,28 +138,30 @@ RULES:
 - NO "top contacts" section
 - Focus on what matters: important decisions and pending items`,
 
-      whatsapp: `Write a summary for each active chat THIS WEEK. Make important topics clickable with [[topic]].
+      whatsapp: `Write a natural summary for each active chat THIS WEEK. Wrap key topics in [[double brackets]] so they become interactive.
 
 Format:
-**Group/Contact Name**
-A few sentences summarizing the main things that happened. Embed [[clickable topics]] naturally.
+**Chat Name**
+3-5 sentences describing what happened this week. Include names, dates, decisions, and outcomes.
 
-Example:
+Examples:
+
 **Family Fun Chat**
-Big week for family planning - finalized [[Thanksgiving]] at Grandma's for Thursday 4pm, everyone's bringing something. [[Uncle Bob]]'s surgery went well and he's recovering at home. Mom's visiting him Saturday.
+Big week! Finalized [[Thanksgiving dinner]] at Grandma's house for Thursday 4pm - everyone's bringing a dish. [[Uncle Bob's surgery]] went well on Tuesday and he's recovering at home. Mom is visiting him Saturday and asked if anyone wants to join. Also started planning [[Christmas gifts]] - budget is $50 per person this year.
 
 **College Friends**
-Locked in the [[reunion]] for Dec 20th at Mike's place. Also celebrated [[John's promotion]] - he got the senior developer role!
+Finally locked in the [[reunion date]] - December 20th at Mike's place, starts at 7pm. Everyone celebrated [[John's promotion]] to Senior Developer at Google! Sarah can't make the reunion but wants to video call in.
 
-**Pending**:
+**Pending questions you haven't answered**:
 - Mom asked if you're bringing dessert to Thanksgiving
+- Mike needs headcount for reunion by Friday
 
 RULES:
-- Write flowing sentences, not keyword lists
-- Only 2-4 clickable topics per chat (the important/recurring ones)
-- NO "talked about various things" or keyword dumps
-- Summary should be readable and meaningful on its own
-- Only show Pending if there are real unanswered questions`,
+- Write naturally like catching up a friend on what happened
+- Include WHO said/did WHAT, WHEN, and any DECISIONS
+- Wrap 3-5 key topics per chat in [[brackets]]
+- NO "there was discussion about" or "they talked about" - state facts directly
+- Only show "Pending" section if there are actual unanswered questions directed at the user`,
 
       notion: `Based on this week's Notion activity, provide a comprehensive well-formatted summary:
 
