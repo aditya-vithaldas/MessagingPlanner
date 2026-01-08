@@ -195,26 +195,49 @@ Use markdown formatting for a clean, readable summary.`
 
   async generateActionItems(data, type) {
     const prompts = {
-      gmail: `Based on these emails, identify ACTION ITEMS that need the user's attention. For each action item:
-1. What needs to be done
-2. Who it's from
-3. Urgency level (High/Medium/Low)
+      gmail: `List action items from these emails as simple todo items.
 
-Focus only on emails that clearly require a response, decision, or action. Format as a numbered list. If no clear action items exist, say so.`,
+Format each as a clear task starting with a verb:
+- Reply to John about the project deadline
+- Review the contract from HR by Friday
+- Send Sarah the meeting notes she requested
 
-      whatsapp: `Based on these WhatsApp messages, identify ACTION ITEMS that need the user's attention. For each action item:
-1. What needs to be done or responded to
-2. Which chat/person it's from
-3. Urgency level (High/Medium/Low)
+RULES:
+- Start each item with an action verb (Reply, Send, Review, Call, Schedule, etc.)
+- Include WHO and WHAT in each item
+- NO metadata like "From:", "Urgency:", "Priority:"
+- NO numbered lists - just bullet points
+- Only include items that actually need action
+- If nothing needs action, say "No action items right now"`,
 
-Focus on messages that require responses, decisions, or follow-up. Format as a numbered list. If no clear action items exist, say so.`,
+      whatsapp: `List action items from these WhatsApp messages as simple todo items.
 
-      notion: `Based on this Notion activity, identify ACTION ITEMS or suggested next steps. For each item:
-1. What should be done next
-2. Related page or entry
-3. Priority level (High/Medium/Low)
+Format each as a clear task:
+- Reply to Mom about Saturday dinner plans
+- Send Raj the photos he asked for
+- Confirm with the group if you're joining the trip
+- Call Dad back - he asked you to call
 
-Focus on incomplete items, entries that need follow-up, or suggested journaling prompts. Format as a numbered list. If no clear action items exist, say so.`
+RULES:
+- Write as clear tasks starting with action verbs
+- Include the person's name and what they need
+- NO metadata like "From:", "Chat:", "Urgency:"
+- NO numbered lists - just bullet points
+- Only real requests or questions directed at the user
+- If nothing needs action, say "No action items right now"`,
+
+      notion: `List suggested actions based on this Notion activity.
+
+Format as simple tasks:
+- Continue writing the journal entry from Monday
+- Review and organize the project notes
+- Add details to the trip planning page
+
+RULES:
+- Write as clear, actionable tasks
+- NO metadata or labels
+- NO numbered lists - just bullet points
+- If nothing needs action, say "No action items right now"`
     };
 
     return this.summarize(data, type, prompts[type]);
