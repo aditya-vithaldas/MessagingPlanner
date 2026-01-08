@@ -720,12 +720,6 @@
 
       let html = text;
 
-      // Convert topic tags [[Topic]] to clickable elements
-      html = html.replace(/\[\[([^\]]+)\]\]/g, (match, topic) => {
-        const escapedTopic = topic.trim().replace(/"/g, '&quot;');
-        return `<span class="topic-tag" onclick="showTopicDetails('${escapedTopic}')">${escapedTopic}</span>`;
-      });
-
       // Convert **bold** to <strong>
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -786,13 +780,25 @@
 
     function toggleActionItem(itemId, element) {
       const item = element.closest('.action-item');
-      const isCompleted = !actionItemsState[itemId];
 
-      actionItemsState[itemId] = isCompleted;
+      // Mark as completed and remove from view
+      actionItemsState[itemId] = true;
       localStorage.setItem('actionItemsState', JSON.stringify(actionItemsState));
 
-      element.classList.toggle('checked', isCompleted);
-      item.classList.toggle('completed', isCompleted);
+      // Animate out and remove
+      item.style.transition = 'opacity 0.3s, transform 0.3s';
+      item.style.opacity = '0';
+      item.style.transform = 'translateX(20px)';
+
+      setTimeout(() => {
+        item.remove();
+
+        // Check if any items left
+        const container = document.getElementById('action-items-content');
+        if (!container.querySelector('.action-item')) {
+          container.innerHTML = '<div class="empty-state"><p>All done! No pending items.</p></div>';
+        }
+      }, 300);
     }
 
     function toggleChat() {

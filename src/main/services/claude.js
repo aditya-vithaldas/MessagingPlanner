@@ -70,7 +70,7 @@ RULES:
 - Only list emails that actually need a response/action
 - If no emails need action, say "Nothing urgent today"`,
 
-      whatsapp: `Write a natural 2-3 sentence summary for each active chat. Wrap key topics in [[double brackets]] so they become interactive.
+      whatsapp: `Write a natural 2-3 sentence summary for each active chat.
 
 Format:
 **Chat Name**
@@ -79,18 +79,17 @@ Natural flowing sentences describing what was discussed. Include specific detail
 Examples:
 
 **Family Fun Chat**
-Everyone wished Tanushree happy birthday and shared memories from [[her party]] last weekend. Mom suggested getting [[a gold necklace]] as a gift and most people agreed. Dad mentioned planning a [[Goa trip]] for February.
+Everyone wished Tanushree happy birthday and shared memories from her party last weekend. Mom suggested getting a gold necklace as a gift and most people agreed. Dad mentioned planning a Goa trip for February.
 
 **Work Team**
-The [[product launch]] is confirmed for Monday at 10am. Sarah presented the [[client demo]] and they loved it but want the header color changed to blue.
+The product launch is confirmed for Monday at 10am. Sarah presented the client demo and they loved it but want the header color changed to blue.
 
 **Priya**
-Caught up after a long time - she got [[promoted to Senior Manager]] at Deloitte! Planning to meet for [[dinner at the new Italian place]] next Saturday.
+Caught up after a long time - she got promoted to Senior Manager at Deloitte! Planning to meet for dinner at the new Italian place next Saturday.
 
 RULES:
 - Write naturally like you're telling a friend what happened
 - Include WHO said WHAT and any DECISIONS made
-- Wrap 2-4 important topics per chat in [[brackets]] - these become interactive
 - NO "they discussed X" or "there was discussion about X" - just state what happened
 - NO generic summaries - be specific with names, places, dates
 - Skip chats with only greetings or "ok/haha" messages`,
@@ -138,7 +137,7 @@ RULES:
 - NO "top contacts" section
 - Focus on what matters: important decisions and pending items`,
 
-      whatsapp: `Write a natural summary for each active chat THIS WEEK. Wrap key topics in [[double brackets]] so they become interactive.
+      whatsapp: `Write a natural summary for each active chat THIS WEEK.
 
 Format:
 **Chat Name**
@@ -147,10 +146,10 @@ Format:
 Examples:
 
 **Family Fun Chat**
-Big week! Finalized [[Thanksgiving dinner]] at Grandma's house for Thursday 4pm - everyone's bringing a dish. [[Uncle Bob's surgery]] went well on Tuesday and he's recovering at home. Mom is visiting him Saturday and asked if anyone wants to join. Also started planning [[Christmas gifts]] - budget is $50 per person this year.
+Big week! Finalized Thanksgiving dinner at Grandma's house for Thursday 4pm - everyone's bringing a dish. Uncle Bob's surgery went well on Tuesday and he's recovering at home. Mom is visiting him Saturday and asked if anyone wants to join. Also started planning Christmas gifts - budget is $50 per person this year.
 
 **College Friends**
-Finally locked in the [[reunion date]] - December 20th at Mike's place, starts at 7pm. Everyone celebrated [[John's promotion]] to Senior Developer at Google! Sarah can't make the reunion but wants to video call in.
+Finally locked in the reunion date - December 20th at Mike's place, starts at 7pm. Everyone celebrated John's promotion to Senior Developer at Google! Sarah can't make the reunion but wants to video call in.
 
 **Pending questions you haven't answered**:
 - Mom asked if you're bringing dessert to Thanksgiving
@@ -159,7 +158,6 @@ Finally locked in the [[reunion date]] - December 20th at Mike's place, starts a
 RULES:
 - Write naturally like catching up a friend on what happened
 - Include WHO said/did WHAT, WHEN, and any DECISIONS
-- Wrap 3-5 key topics per chat in [[brackets]]
 - NO "there was discussion about" or "they talked about" - state facts directly
 - Only show "Pending" section if there are actual unanswered questions directed at the user`,
 
