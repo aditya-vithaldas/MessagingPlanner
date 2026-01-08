@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <title>MyBrain - Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dashboard-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Top-level source tabs */
+    .source-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    .source-tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      border: 2px solid transparent;
+      color: var(--text-secondary);
+    }
+    .source-tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .source-tab.active {
+      background: var(--bg-secondary);
+      border-color: var(--accent-blue);
+      color: var(--text-primary);
+    }
+    .source-tab.disconnected {
+      opacity: 0.5;
+    }
+    .source-tab-icon {
+      font-size: 24px;
+    }
+    .source-tab-label {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .source-tab-status {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(74, 158, 255, 0.2);
+      color: var(--accent-blue);
+    }
+    .source-tab.disconnected .source-tab-status {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--accent-red);
+    }
+
+    /* Main content card */
+    .content-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 400px;
+    }
+
+    /* Sub-tabs within each source */
+    .sub-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    .sub-tab {
+      flex: 1;
+      padding: 14px 16px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .sub-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.03);
+    }
+    .sub-tab.active {
+      color: var(--accent-blue);
+      border-bottom-color: var(--accent-blue);
+      background: rgba(74, 158, 255, 0.05);
+    }
+
+    /* Source panels (one for each source) */
+    .source-panel {
+      display: none;
+    }
+    .source-panel.active {
+      display: block;
+    }
+
+    /* Sub-tab content panels */
+    .sub-panel {
+      display: none;
+      padding: 24px;
+      min-height: 300px;
+    }
+    .sub-panel.active {
+      display: block;
+    }
+
+    .summary-content {
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .summary-content strong {
+      color: var(--text-primary);
+    }
+
+    /* Markdown formatting */
+    .summary-h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 12px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .summary-h3:first-child {
+      margin-top: 0;
+    }
+    .summary-h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin: 16px 0 8px 0;
+    }
+    .summary-list {
+      margin: 8px 0;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+    .summary-list li {
+      margin: 6px 0;
+      line-height: 1.5;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+    .summary-table th {
+      background: var(--bg-secondary);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-color);
+    }
+    .summary-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .summary-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Topic tag styles */
+    .topic-tag {
+      display: inline;
+      background: linear-gradient(135deg, rgba(74, 158, 255, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(74, 158, 255, 0.4);
+      color: var(--accent-blue);
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .topic-tag:hover {
+      background: linear-gradient(135deg, rgba(74, 158, 255, 0.35), rgba(168, 85, 247, 0.35));
+      border-color: var(--accent-blue);
+    }
+
+    /* Topic modal */
+    .topic-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+    }
+    .topic-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1999;
+    }
+    .topic-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .topic-modal-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent-blue);
+    }
+    .topic-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .topic-modal-close:hover {
+      color: var(--text-primary);
+    }
+    .topic-modal-content {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .topic-modal-loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+    }
+    .topic-modal-loading .mini-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Q&A section */
+    .qa-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .qa-input-row {
+      display: flex;
+      gap: 12px;
+    }
+    .qa-input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+    .qa-input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+    .qa-submit {
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .qa-submit:hover { opacity: 0.9; }
+    .qa-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .qa-answer {
+      padding: 20px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border-left: 3px solid var(--accent-blue);
+    }
+    .qa-answer-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--accent-blue);
+    }
+    .qa-answer-text {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .suggested-questions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .suggested-q {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .suggested-q:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    /* Loading & Error states */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      color: var(--text-muted);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 16px;
+      border-radius: 10px;
+    }
+    .not-connected {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .not-connected-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    /* Cache indicators */
+    .stale-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      color: #fbbf24;
+    }
+    .stale-indicator .mini-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(251, 191, 36, 0.3);
+      border-top-color: #fbbf24;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .cache-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      opacity: 0.7;
+    }
+
+    /* Overview card */
+    .overview-card {
+      background: linear-gradient(135deg, var(--bg-card), rgba(74, 158, 255, 0.08));
+      border: 1px solid rgba(74, 158, 255, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .overview-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .overview-icon {
+      font-size: 32px;
+    }
+    .overview-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .overview-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .overview-content {
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="app-header" style="margin-bottom: 24px;">
+      <div class="navbar">
+        <h1>MyBrain</h1>
+        <div class="nav-links">
+          <button class="btn btn-sm btn-secondary" onclick="refreshAll()" title="Refresh all data">Refresh</button>
+          <button class="btn btn-sm btn-secondary" onclick="goToSettings()">Settings</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Today at a Glance - Combined Summary -->
+    <div class="overview-card" id="overview-section">
+      <div class="overview-header">
+        <span class="overview-icon">🧠</span>
+        <div>
+          <div class="overview-title">Today at a Glance</div>
+          <div class="overview-subtitle">AI-powered summary from all your connected sources</div>
+        </div>
+        <button class="btn btn-sm btn-secondary" style="margin-left: auto;" onclick="loadCombinedSummary(true)">Refresh</button>
+      </div>
+      <div class="overview-content" id="overview-content">
+        <div class="loading-container" style="padding: 30px;">
+          <div class="spinner"></div>
+          <span>Generating your daily overview...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top-level Source Tabs -->
+    <div class="source-tabs">
+      <div class="source-tab active" id="tab-whatsapp" onclick="switchSource('whatsapp')">
+        <span class="source-tab-icon">💬</span>
+        <span class="source-tab-label">WhatsApp</span>
+        <span class="source-tab-status" id="status-whatsapp">...</span>
+      </div>
+      <div class="source-tab" id="tab-gmail" onclick="switchSource('gmail')">
+        <span class="source-tab-icon">📧</span>
+        <span class="source-tab-label">Gmail</span>
+        <span class="source-tab-status" id="status-gmail">...</span>
+      </div>
+      <div class="source-tab" id="tab-notion" onclick="switchSource('notion')">
+        <span class="source-tab-icon">📝</span>
+        <span class="source-tab-label">Notion</span>
+        <span class="source-tab-status" id="status-notion">...</span>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="content-card">
+      <!-- WhatsApp Panel -->
+      <div class="source-panel active" id="panel-whatsapp">
+        <div class="sub-tabs">
+          <div class="sub-tab active" onclick="switchSubTab('whatsapp', 'today')">Today</div>
+          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'week')">This Week</div>
+          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'actions')">Action Items</div>
+          <div class="sub-tab" onclick="switchSubTab('whatsapp', 'ask')">Ask AI</div>
+        </div>
+        <div class="sub-panel active" id="whatsapp-today">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="whatsapp-week">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="whatsapp-actions">
+          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
+        </div>
+        <div class="sub-panel" id="whatsapp-ask">
+          <div class="qa-container">
+            <div class="qa-input-row">
+              <input type="text" class="qa-input" id="whatsapp-question" placeholder="Ask anything about your WhatsApp chats...">
+              <button class="qa-submit" onclick="askQuestion('whatsapp')">Ask</button>
+            </div>
+            <div class="suggested-questions">
+              <span class="suggested-q" onclick="askSuggested('whatsapp', 'What are the groups discussing?')">Group topics</span>
+              <span class="suggested-q" onclick="askSuggested('whatsapp', 'Any messages I should reply to?')">Need to reply</span>
+              <span class="suggested-q" onclick="askSuggested('whatsapp', 'Who has been most active?')">Most active</span>
+            </div>
+            <div id="whatsapp-answer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gmail Panel -->
+      <div class="source-panel" id="panel-gmail">
+        <div class="sub-tabs">
+          <div class="sub-tab active" onclick="switchSubTab('gmail', 'today')">Today</div>
+          <div class="sub-tab" onclick="switchSubTab('gmail', 'week')">This Week</div>
+          <div class="sub-tab" onclick="switchSubTab('gmail', 'actions')">Action Items</div>
+          <div class="sub-tab" onclick="switchSubTab('gmail', 'ask')">Ask AI</div>
+        </div>
+        <div class="sub-panel active" id="gmail-today">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="gmail-week">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="gmail-actions">
+          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
+        </div>
+        <div class="sub-panel" id="gmail-ask">
+          <div class="qa-container">
+            <div class="qa-input-row">
+              <input type="text" class="qa-input" id="gmail-question" placeholder="Ask anything about your emails...">
+              <button class="qa-submit" onclick="askQuestion('gmail')">Ask</button>
+            </div>
+            <div class="suggested-questions">
+              <span class="suggested-q" onclick="askSuggested('gmail', 'What emails need my attention?')">What needs attention?</span>
+              <span class="suggested-q" onclick="askSuggested('gmail', 'Who emailed me the most?')">Top senders</span>
+              <span class="suggested-q" onclick="askSuggested('gmail', 'Any important deadlines?')">Deadlines</span>
+            </div>
+            <div id="gmail-answer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notion Panel -->
+      <div class="source-panel" id="panel-notion">
+        <div class="sub-tabs">
+          <div class="sub-tab active" onclick="switchSubTab('notion', 'today')">Today</div>
+          <div class="sub-tab" onclick="switchSubTab('notion', 'week')">This Week</div>
+          <div class="sub-tab" onclick="switchSubTab('notion', 'actions')">Action Items</div>
+          <div class="sub-tab" onclick="switchSubTab('notion', 'ask')">Ask AI</div>
+        </div>
+        <div class="sub-panel active" id="notion-today">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="notion-week">
+          <div class="loading-container"><div class="spinner"></div><span>Loading summary...</span></div>
+        </div>
+        <div class="sub-panel" id="notion-actions">
+          <div class="loading-container"><div class="spinner"></div><span>Loading action items...</span></div>
+        </div>
+        <div class="sub-panel" id="notion-ask">
+          <div class="qa-container">
+            <div class="qa-input-row">
+              <input type="text" class="qa-input" id="notion-question" placeholder="Ask anything about your Notion...">
+              <button class="qa-submit" onclick="askQuestion('notion')">Ask</button>
+            </div>
+            <div class="suggested-questions">
+              <span class="suggested-q" onclick="askSuggested('notion', 'What are the themes in My Journey?')">Journey themes</span>
+              <span class="suggested-q" onclick="askSuggested('notion', 'What did I work on recently?')">Recent work</span>
+              <span class="suggested-q" onclick="askSuggested('notion', 'What databases do I have?')">My databases</span>
+            </div>
+            <div id="notion-answer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.8rem;">
+      Last updated: <span id="last-updated">-</span>
+    </div>
+
+    <!-- Topic Details Modal -->
+    <div id="topic-modal-container" style="display: none;">
+      <div class="topic-modal-overlay" onclick="closeTopicModal()"></div>
+      <div class="topic-modal">
+        <div class="topic-modal-header">
+          <span class="topic-modal-title" id="topic-modal-title">Topic</span>
+          <button class="topic-modal-close" onclick="closeTopicModal()">&times;</button>
+        </div>
+        <div class="topic-modal-content" id="topic-modal-content">
+          <div class="topic-modal-loading">
+            <div class="mini-spinner"></div>
+            <span>Getting details...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let connectionStatus = { gmail: false, whatsapp: false, notion: false };
+    let loadedContent = {
+      gmail: { today: false, week: false, actions: false },
+      whatsapp: { today: false, week: false, actions: false },
+      notion: { today: false, week: false, actions: false }
+    };
+    let claudeConfigured = false;
+    let currentSource = 'whatsapp';
+    let combinedLoaded = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkClaudeStatus();
+      await checkConnectionStatus();
+
+      // Set up enter key handlers for question inputs
+      ['gmail', 'whatsapp', 'notion'].forEach(source => {
+        const input = document.getElementById(`${source}-question`);
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') askQuestion(source);
+        });
+      });
+
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    });
+
+    async function checkClaudeStatus() {
+      const status = await window.api.claudeGetApiKeyStatus();
+      claudeConfigured = status.configured || status.hasEnvKey;
+    }
+
+    async function checkConnectionStatus() {
+      const status = await window.api.getSetupStatus();
+      connectionStatus = {
+        gmail: status.gmail,
+        whatsapp: status.whatsapp,
+        notion: status.notion
+      };
+
+      // Update tab statuses
+      updateTabStatus('whatsapp', status.whatsapp);
+      updateTabStatus('gmail', status.gmail);
+      updateTabStatus('notion', status.notion);
+
+      // Load summaries for connected sources
+      if (claudeConfigured) {
+        if (status.whatsapp) loadTodaySummary('whatsapp');
+        if (status.gmail) loadTodaySummary('gmail');
+        if (status.notion) loadTodaySummary('notion');
+
+        if (status.gmail || status.whatsapp || status.notion) {
+          loadCombinedSummary();
+        } else {
+          showOverviewNotConnected();
+        }
+      } else {
+        showOverviewNeedsClaude();
+      }
+
+      // Show not connected state for disconnected sources
+      ['whatsapp', 'gmail', 'notion'].forEach(source => {
+        if (!connectionStatus[source]) {
+          showSourceNotConnected(source);
+        }
+      });
+    }
+
+    function updateTabStatus(source, connected) {
+      const tab = document.getElementById(`tab-${source}`);
+      const statusEl = document.getElementById(`status-${source}`);
+
+      if (connected) {
+        tab.classList.remove('disconnected');
+        statusEl.textContent = 'Connected';
+        statusEl.style.background = 'rgba(34, 197, 94, 0.2)';
+        statusEl.style.color = 'var(--accent-green)';
+      } else {
+        tab.classList.add('disconnected');
+        statusEl.textContent = 'Not connected';
+        statusEl.style.background = 'rgba(248, 113, 113, 0.2)';
+        statusEl.style.color = 'var(--accent-red)';
+      }
+    }
+
+    function switchSource(source) {
+      currentSource = source;
+
+      // Update tabs
+      document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(`tab-${source}`).classList.add('active');
+
+      // Update panels
+      document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`panel-${source}`).classList.add('active');
+
+      // Load today's summary if not loaded and connected
+      if (connectionStatus[source] && claudeConfigured && !loadedContent[source].today) {
+        loadTodaySummary(source);
+      }
+    }
+
+    function switchSubTab(source, tab) {
+      // Update sub-tab buttons
+      const panel = document.getElementById(`panel-${source}`);
+      panel.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update sub-panels
+      panel.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`${source}-${tab}`).classList.add('active');
+
+      // Load content if needed
+      if (!connectionStatus[source] || !claudeConfigured) return;
+
+      if (tab === 'today' && !loadedContent[source].today) {
+        loadTodaySummary(source);
+      } else if (tab === 'week' && !loadedContent[source].week) {
+        loadWeekSummary(source);
+      } else if (tab === 'actions' && !loadedContent[source].actions) {
+        loadActionItems(source);
+      }
+    }
+
+    function showSourceNotConnected(source) {
+      ['today', 'week', 'actions', 'ask'].forEach(tab => {
+        const panel = document.getElementById(`${source}-${tab}`);
+        const icon = source === 'gmail' ? '📧' : source === 'whatsapp' ? '💬' : '📝';
+        panel.innerHTML = `
+          <div class="not-connected">
+            <div class="not-connected-icon">${icon}</div>
+            <p>${source.charAt(0).toUpperCase() + source.slice(1)} not connected</p>
+            <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
+              Connect ${source.charAt(0).toUpperCase() + source.slice(1)}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function showOverviewNotConnected() {
+      document.getElementById('overview-content').innerHTML = `
+        <div class="not-connected" style="padding: 20px;">
+          <div class="not-connected-icon">🔗</div>
+          <p>Connect at least one data source to see your daily overview</p>
+          <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
+            Go to Settings
+          </button>
+        </div>
+      `;
+    }
+
+    function showOverviewNeedsClaude() {
+      document.getElementById('overview-content').innerHTML = `
+        <div class="not-connected" style="padding: 20px;">
+          <div class="not-connected-icon">🔑</div>
+          <p>Claude API key required for AI summaries</p>
+          <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="goToSettings()">
+            Configure in Settings
+          </button>
+        </div>
+      `;
+    }
+
+    async function loadTodaySummary(source, forceRefresh = false) {
+      const panel = document.getElementById(`${source}-today`);
+      if (forceRefresh || !loadedContent[source].today) {
+        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Generating today\'s summary...</span></div>';
+      }
+
+      try {
+        const result = await window.api.getTodaySummary(source, forceRefresh);
+        if (result.error) {
+          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          panel.innerHTML = renderSummaryWithCache(result.summary, result);
+          loadedContent[source].today = true;
+          if (result.isStale) pollForFreshData(source, 'today', 'getTodaySummary');
+        }
+      } catch (error) {
+        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
+
+    async function loadWeekSummary(source, forceRefresh = false) {
+      const panel = document.getElementById(`${source}-week`);
+      if (forceRefresh || !loadedContent[source].week) {
+        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Generating this week\'s summary...</span></div>';
+      }
+
+      try {
+        const result = await window.api.getWeekSummary(source, forceRefresh);
+        if (result.error) {
+          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          panel.innerHTML = renderSummaryWithCache(result.summary, result);
+          loadedContent[source].week = true;
+          if (result.isStale) pollForFreshData(source, 'week', 'getWeekSummary');
+        }
+      } catch (error) {
+        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
+
+    async function loadActionItems(source, forceRefresh = false) {
+      const panel = document.getElementById(`${source}-actions`);
+      if (forceRefresh || !loadedContent[source].actions) {
+        panel.innerHTML = '<div class="loading-container"><div class="spinner"></div><span>Identifying action items...</span></div>';
+      }
+
+      try {
+        const result = await window.api.getActionItems(source, forceRefresh);
+        if (result.error) {
+          panel.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          panel.innerHTML = renderSummaryWithCache(result.actionItems, result);
+          loadedContent[source].actions = true;
+          if (result.isStale) pollForFreshData(source, 'actions', 'getActionItems');
+        }
+      } catch (error) {
+        panel.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
+
+    async function loadCombinedSummary(forceRefresh = false) {
+      const content = document.getElementById('overview-content');
+      if (forceRefresh || !combinedLoaded) {
+        content.innerHTML = '<div class="loading-container" style="padding: 30px;"><div class="spinner"></div><span>Generating your daily overview...</span></div>';
+      }
+
+      try {
+        const result = await window.api.getCombinedSummary(forceRefresh);
+        if (result.error) {
+          content.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          let html = '';
+          if (result.isStale) {
+            html += `
+              <div class="stale-indicator">
+                <div class="mini-spinner"></div>
+                <span>Updating... showing cached data from ${formatCacheAge(result.cacheAge)}</span>
+              </div>
+            `;
+          }
+          html += `<div class="summary-content">${formatSummary(result.summary)}</div>`;
+          if (result.fromCache && !result.isStale && result.cacheAge) {
+            html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
+          }
+          content.innerHTML = html;
+          combinedLoaded = true;
+          if (result.isStale) pollForCombinedRefresh();
+        }
+      } catch (error) {
+        content.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
+
+    async function askQuestion(source) {
+      const input = document.getElementById(`${source}-question`);
+      const question = input.value.trim();
+      if (!question) return;
+
+      const answerDiv = document.getElementById(`${source}-answer`);
+      answerDiv.innerHTML = '<div class="loading-container" style="padding: 20px;"><div class="spinner"></div><span>Thinking...</span></div>';
+
+      try {
+        const result = await window.api.askQuestion(source, question);
+        if (result.error) {
+          answerDiv.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          answerDiv.innerHTML = `
+            <div class="qa-answer">
+              <div class="qa-answer-title">Answer</div>
+              <div class="qa-answer-text">${formatSummary(result.answer)}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        answerDiv.innerHTML = `<div class="error-box">${error.message}</div>`;
+      }
+    }
+
+    function askSuggested(source, question) {
+      document.getElementById(`${source}-question`).value = question;
+      askQuestion(source);
+    }
+
+    function formatSummary(text) {
+      if (!text) return '';
+      let html = text;
+
+      // Topic tags [[Topic]]
+      html = html.replace(/\[\[([^\]]+?)(?:::([^\]]+))?\]\]/g, (match, topic) => {
+        const escapedTopic = topic.trim().replace(/"/g, '&quot;');
+        return `<span class="topic-tag" onclick="showTopicDetails('${escapedTopic}')">${escapedTopic}</span>`;
+      });
+
+      // Tables
+      html = html.replace(/\|(.+)\|\n\|[-:\s|]+\|\n((?:\|.+\|\n?)+)/g, (match, header, body) => {
+        const headers = header.split('|').filter(h => h.trim()).map(h => `<th>${h.trim()}</th>`).join('');
+        const rows = body.trim().split('\n').map(row => {
+          const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        }).join('');
+        return `<table class="summary-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
+      });
+
+      // Headers
+      html = html.replace(/^### (.+)$/gm, '<h4 class="summary-h4">$1</h4>');
+      html = html.replace(/^## (.+)$/gm, '<h3 class="summary-h3">$1</h3>');
+
+      // Bold
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+      // Lists
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.+<\/li>\n?)+/g, '<ul class="summary-list">$&</ul>');
+      html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+
+      // Line breaks
+      html = html.replace(/\n(?!<)/g, '<br>');
+      html = html.replace(/<\/(h3|h4|table|ul|ol)><br>/g, '</$1>');
+      html = html.replace(/<br><(h3|h4|table|ul)/g, '<$1');
+
+      return html;
+    }
+
+    function formatCacheAge(ageMs) {
+      const minutes = Math.floor(ageMs / 60000);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      const remainingMins = minutes % 60;
+      return remainingMins > 0 ? `${hours}h ${remainingMins}m ago` : `${hours}h ago`;
+    }
+
+    function renderSummaryWithCache(summary, result) {
+      let html = '';
+      if (result.isStale) {
+        html += `
+          <div class="stale-indicator">
+            <div class="mini-spinner"></div>
+            <span>Updating... showing cached data from ${formatCacheAge(result.cacheAge)}</span>
+          </div>
+        `;
+      }
+      html += `<div class="summary-content">${formatSummary(summary)}</div>`;
+      if (result.fromCache && !result.isStale && result.cacheAge) {
+        html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
+      }
+      return html;
+    }
+
+    async function pollForFreshData(source, tab, apiMethod) {
+      let attempts = 0;
+      const maxAttempts = 20;
+
+      const poll = async () => {
+        attempts++;
+        if (attempts > maxAttempts) return;
+
+        try {
+          let result;
+          if (apiMethod === 'getTodaySummary') result = await window.api.getTodaySummary(source);
+          else if (apiMethod === 'getWeekSummary') result = await window.api.getWeekSummary(source);
+          else if (apiMethod === 'getActionItems') result = await window.api.getActionItems(source);
+
+          if (result && !result.isStale && !result.error) {
+            const panel = document.getElementById(`${source}-${tab}`);
+            const dataKey = apiMethod === 'getActionItems' ? 'actionItems' : 'summary';
+            panel.innerHTML = renderSummaryWithCache(result[dataKey], result);
+          } else if (result && result.isStale) {
+            setTimeout(poll, 3000);
+          }
+        } catch (e) {
+          console.error('Poll error:', e);
+        }
+      };
+
+      setTimeout(poll, 3000);
+    }
+
+    async function pollForCombinedRefresh() {
+      let attempts = 0;
+      const maxAttempts = 20;
+
+      const poll = async () => {
+        attempts++;
+        if (attempts > maxAttempts) return;
+
+        try {
+          const result = await window.api.getCombinedSummary();
+          if (result && !result.isStale && !result.error) {
+            const content = document.getElementById('overview-content');
+            let html = `<div class="summary-content">${formatSummary(result.summary)}</div>`;
+            if (result.fromCache && result.cacheAge) {
+              html += `<div class="cache-info">Cached ${formatCacheAge(result.cacheAge)}</div>`;
+            }
+            content.innerHTML = html;
+          } else if (result && result.isStale) {
+            setTimeout(poll, 3000);
+          }
+        } catch (e) {
+          console.error('Combined poll error:', e);
+        }
+      };
+
+      setTimeout(poll, 3000);
+    }
+
+    async function refreshAll() {
+      loadedContent = {
+        gmail: { today: false, week: false, actions: false },
+        whatsapp: { today: false, week: false, actions: false },
+        notion: { today: false, week: false, actions: false }
+      };
+      combinedLoaded = false;
+
+      await checkClaudeStatus();
+      const status = await window.api.getSetupStatus();
+      connectionStatus = { gmail: status.gmail, whatsapp: status.whatsapp, notion: status.notion };
+
+      updateTabStatus('whatsapp', status.whatsapp);
+      updateTabStatus('gmail', status.gmail);
+      updateTabStatus('notion', status.notion);
+
+      if (claudeConfigured) {
+        const sources = [];
+        if (status.whatsapp) sources.push('whatsapp');
+        if (status.gmail) sources.push('gmail');
+        if (status.notion) sources.push('notion');
+
+        for (const source of sources) {
+          loadTodaySummary(source, true);
+          loadWeekSummary(source, true);
+          loadActionItems(source, true);
+        }
+
+        if (sources.length > 0) loadCombinedSummary(true);
+      }
+
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Auto-refresh
+    const AUTO_REFRESH_INTERVAL = 2 * 60 * 60 * 1000;
+    let lastRefreshTime = Date.now();
+
+    function checkAutoRefresh() {
+      if (Date.now() - lastRefreshTime > AUTO_REFRESH_INTERVAL) {
+        lastRefreshTime = Date.now();
+        refreshAll();
+      }
+    }
+
+    setInterval(checkAutoRefresh, 5 * 60 * 1000);
+    window.addEventListener('focus', checkAutoRefresh);
+
+    function goToSettings() {
+      window.api.navigateTo('setup');
+    }
+
+    // Topic modal
+    async function showTopicDetails(topic) {
+      const container = document.getElementById('topic-modal-container');
+      const title = document.getElementById('topic-modal-title');
+      const content = document.getElementById('topic-modal-content');
+
+      title.textContent = topic;
+      content.innerHTML = `
+        <div class="topic-modal-loading">
+          <div class="mini-spinner"></div>
+          <span>Getting details from Claude...</span>
+        </div>
+      `;
+      container.style.display = 'block';
+
+      try {
+        const result = await window.api.getTopicDetails(topic, '', currentSource);
+        if (result.error) {
+          content.innerHTML = `<div class="error-box">${result.error}</div>`;
+        } else {
+          content.innerHTML = `<div style="line-height: 1.6;">${result.details}</div>`;
+        }
+      } catch (error) {
+        content.innerHTML = `<div class="error-box">Failed to load details: ${error.message}</div>`;
+      }
+    }
+
+    function closeTopicModal() {
+      document.getElementById('topic-modal-container').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeTopicModal();
+    });
+  </script>
+</body>
+</html>

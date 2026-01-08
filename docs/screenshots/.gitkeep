@@ -1,0 +1,14 @@
+# Add your screenshots here
+
+To capture screenshots for the README:
+
+1. **dashboard.png** - Main dashboard with the "Today at a Glance" section and source tabs
+2. **setup.png** - Setup page showing all connection cards
+3. **whatsapp-tab.png** - WhatsApp tab with a summary displayed
+4. **whatsapp-qr.png** - WhatsApp card with QR code showing
+5. **gmail-oauth.png** - Gmail card (or browser OAuth screen)
+6. **notion-setup.png** - Notion card with token input
+7. **claude-setup.png** - Claude card with API key input
+
+Recommended size: 1200x800 or similar aspect ratio
+Format: PNG

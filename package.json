@@ -1,0 +1,24 @@
+{
+  "name": "my-brain-app",
+  "version": "1.0.0",
+  "description": "Personal data aggregator for Gmail, WhatsApp, and Notion",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "googleapis": "^129.0.0",
+    "whatsapp-web.js": "^1.23.0",
+    "@notionhq/client": "^2.2.14",
+    "qrcode": "^1.5.3",
+    "@anthropic-ai/sdk": "^0.32.1",
+    "better-sqlite3": "^9.4.3"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

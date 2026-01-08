@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>MyBrain - Setup</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1>MyBrain</h1>
+      <p>Connect your personal data sources</p>
+    </header>
+
+    <!-- Claude AI Card - Required for AI features -->
+    <div class="card setup-card" id="claude-card" style="margin-bottom: 24px; border: 2px solid var(--accent-purple);">
+      <div class="status-indicator">
+        <span class="status-badge status-disconnected" id="claude-status">Not Configured</span>
+      </div>
+      <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));">🧠</div>
+        <div>
+          <div class="card-title">Claude AI (Required)</div>
+          <div class="card-subtitle">Powers AI summaries and Q&A</div>
+        </div>
+      </div>
+      <div class="card-content">
+        <p>Enter your Anthropic API key to enable AI-powered summaries and question answering.</p>
+        <div class="input-group">
+          <label for="claude-api-key">Anthropic API Key</label>
+          <input type="password" id="claude-api-key" placeholder="sk-ant-api03-...">
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+          Get your key from <a href="#" onclick="openAnthropicConsole()" style="color: var(--accent-blue);">console.anthropic.com</a>
+        </p>
+        <div>
+          <button class="btn btn-primary" id="claude-connect-btn" onclick="connectClaude()">
+            Save API Key
+          </button>
+          <button class="btn btn-danger btn-sm" id="claude-disconnect-btn" style="display: none;" onclick="disconnectClaude()">
+            Remove Key
+          </button>
+        </div>
+        <div id="claude-error" class="error-message" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="setup-grid">
+      <!-- Gmail Card -->
+      <div class="card setup-card" id="gmail-card">
+        <div class="status-indicator">
+          <span class="status-badge status-disconnected" id="gmail-status">Not Connected</span>
+        </div>
+        <div class="card-header">
+          <div class="card-icon gmail">📧</div>
+          <div>
+            <div class="card-title">Gmail</div>
+            <div class="card-subtitle">Connect via Google OAuth</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <p>Access your email inbox, view recent messages, and get unread counts.</p>
+          <div style="margin-top: 16px;">
+            <button class="btn btn-primary" id="gmail-connect-btn" onclick="connectGmail()">
+              Connect Gmail
+            </button>
+            <button class="btn btn-danger btn-sm" id="gmail-disconnect-btn" style="display: none;" onclick="disconnectGmail()">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp Card -->
+      <div class="card setup-card" id="whatsapp-card">
+        <div class="status-indicator">
+          <span class="status-badge status-disconnected" id="whatsapp-status">Not Connected</span>
+        </div>
+        <div class="card-header">
+          <div class="card-icon whatsapp">💬</div>
+          <div>
+            <div class="card-title">WhatsApp</div>
+            <div class="card-subtitle">Scan QR code to connect</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <p>Access your WhatsApp chats, view recent messages, and unread counts.</p>
+          <div id="whatsapp-qr-section" style="display: none;">
+            <div class="qr-container">
+              <img id="whatsapp-qr-img" src="" alt="WhatsApp QR Code">
+              <p style="color: #666; margin-top: 10px; font-size: 0.85rem;">Scan with WhatsApp</p>
+            </div>
+          </div>
+          <div id="whatsapp-loading" style="display: none;" class="loading">
+            <div class="spinner"></div>
+          </div>
+          <div style="margin-top: 16px;">
+            <button class="btn btn-primary" id="whatsapp-connect-btn" onclick="connectWhatsApp()">
+              Connect WhatsApp
+            </button>
+            <button class="btn btn-danger btn-sm" id="whatsapp-disconnect-btn" style="display: none;" onclick="disconnectWhatsApp()">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notion Card -->
+      <div class="card setup-card" id="notion-card">
+        <div class="status-indicator">
+          <span class="status-badge status-disconnected" id="notion-status">Not Connected</span>
+        </div>
+        <div class="card-header">
+          <div class="card-icon notion">📝</div>
+          <div>
+            <div class="card-title">Notion</div>
+            <div class="card-subtitle">Connect with Integration Token</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <p>Access your Notion workspace, view recent pages, and databases.</p>
+          <div class="input-group">
+            <label for="notion-token">Integration Token</label>
+            <input type="password" id="notion-token" placeholder="secret_xxxxxxxxxxxxx">
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+            Get your token from <a href="#" onclick="openNotionIntegrations()" style="color: var(--accent-blue);">notion.so/my-integrations</a>
+          </p>
+          <div>
+            <button class="btn btn-primary" id="notion-connect-btn" onclick="connectNotion()">
+              Connect Notion
+            </button>
+            <button class="btn btn-danger btn-sm" id="notion-disconnect-btn" style="display: none;" onclick="disconnectNotion()">
+              Disconnect
+            </button>
+          </div>
+          <div id="notion-error" class="error-message" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <div>
+        <span class="status-badge" id="overall-status">0/3 Connected</span>
+      </div>
+      <button class="btn btn-success" id="continue-btn" onclick="continueToApp()" disabled>
+        Continue to Dashboard →
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Track connection status
+    let connections = {
+      gmail: false,
+      whatsapp: false,
+      notion: false,
+      claude: false
+    };
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', async () => {
+      const status = await window.api.getSetupStatus();
+      const claudeStatus = await window.api.claudeGetApiKeyStatus();
+
+      connections = {
+        gmail: status.gmail,
+        whatsapp: status.whatsapp,
+        notion: status.notion,
+        claude: claudeStatus.configured
+      };
+      updateUI();
+
+      // Set up WhatsApp event listeners
+      window.api.onWhatsAppQR((qr) => {
+        document.getElementById('whatsapp-loading').style.display = 'none';
+        document.getElementById('whatsapp-qr-section').style.display = 'block';
+        document.getElementById('whatsapp-qr-img').src = qr;
+      });
+
+      window.api.onWhatsAppReady(() => {
+        connections.whatsapp = true;
+        updateUI();
+        document.getElementById('whatsapp-qr-section').style.display = 'none';
+        document.getElementById('whatsapp-loading').style.display = 'none';
+      });
+
+      window.api.onWhatsAppAuthFailure((msg) => {
+        document.getElementById('whatsapp-loading').style.display = 'none';
+        document.getElementById('whatsapp-qr-section').style.display = 'none';
+        alert('WhatsApp authentication failed: ' + msg);
+      });
+
+      window.api.onWhatsAppQRTimeout(() => {
+        document.getElementById('whatsapp-loading').style.display = 'none';
+        document.getElementById('whatsapp-qr-section').style.display = 'none';
+        document.getElementById('whatsapp-connect-btn').disabled = false;
+        document.getElementById('whatsapp-connect-btn').textContent = 'Connect WhatsApp';
+      });
+
+      window.api.onGmailAuthSuccess(() => {
+        connections.gmail = true;
+        updateUI();
+      });
+    });
+
+    function updateUI() {
+      // Update Claude
+      const claudeStatus = document.getElementById('claude-status');
+      const claudeConnectBtn = document.getElementById('claude-connect-btn');
+      const claudeDisconnectBtn = document.getElementById('claude-disconnect-btn');
+      const claudeInput = document.getElementById('claude-api-key');
+      if (connections.claude) {
+        claudeStatus.textContent = 'Configured';
+        claudeStatus.className = 'status-badge status-connected';
+        claudeConnectBtn.style.display = 'none';
+        claudeDisconnectBtn.style.display = 'inline-flex';
+        claudeInput.style.display = 'none';
+        claudeInput.parentElement.querySelector('label').style.display = 'none';
+      } else {
+        claudeStatus.textContent = 'Not Configured';
+        claudeStatus.className = 'status-badge status-disconnected';
+        claudeConnectBtn.style.display = 'inline-flex';
+        claudeDisconnectBtn.style.display = 'none';
+        claudeInput.style.display = 'block';
+        claudeInput.parentElement.querySelector('label').style.display = 'block';
+      }
+
+      // Update Gmail
+      const gmailStatus = document.getElementById('gmail-status');
+      const gmailConnectBtn = document.getElementById('gmail-connect-btn');
+      const gmailDisconnectBtn = document.getElementById('gmail-disconnect-btn');
+      if (connections.gmail) {
+        gmailStatus.textContent = 'Connected';
+        gmailStatus.className = 'status-badge status-connected';
+        gmailConnectBtn.style.display = 'none';
+        gmailDisconnectBtn.style.display = 'inline-flex';
+      } else {
+        gmailStatus.textContent = 'Not Connected';
+        gmailStatus.className = 'status-badge status-disconnected';
+        gmailConnectBtn.style.display = 'inline-flex';
+        gmailDisconnectBtn.style.display = 'none';
+      }
+
+      // Update WhatsApp
+      const whatsappStatus = document.getElementById('whatsapp-status');
+      const whatsappConnectBtn = document.getElementById('whatsapp-connect-btn');
+      const whatsappDisconnectBtn = document.getElementById('whatsapp-disconnect-btn');
+      if (connections.whatsapp) {
+        whatsappStatus.textContent = 'Connected';
+        whatsappStatus.className = 'status-badge status-connected';
+        whatsappConnectBtn.style.display = 'none';
+        whatsappDisconnectBtn.style.display = 'inline-flex';
+      } else {
+        whatsappStatus.textContent = 'Not Connected';
+        whatsappStatus.className = 'status-badge status-disconnected';
+        whatsappConnectBtn.style.display = 'inline-flex';
+        whatsappDisconnectBtn.style.display = 'none';
+      }
+
+      // Update Notion
+      const notionStatus = document.getElementById('notion-status');
+      const notionConnectBtn = document.getElementById('notion-connect-btn');
+      const notionDisconnectBtn = document.getElementById('notion-disconnect-btn');
+      if (connections.notion) {
+        notionStatus.textContent = 'Connected';
+        notionStatus.className = 'status-badge status-connected';
+        notionConnectBtn.style.display = 'none';
+        notionDisconnectBtn.style.display = 'inline-flex';
+        document.getElementById('notion-token').style.display = 'none';
+      } else {
+        notionStatus.textContent = 'Not Connected';
+        notionStatus.className = 'status-badge status-disconnected';
+        notionConnectBtn.style.display = 'inline-flex';
+        notionDisconnectBtn.style.display = 'none';
+        document.getElementById('notion-token').style.display = 'block';
+      }
+
+      // Update overall status (excluding claude from count display)
+      const dataSourceCount = [connections.gmail, connections.whatsapp, connections.notion].filter(Boolean).length;
+      document.getElementById('overall-status').textContent = `${dataSourceCount}/3 Data Sources Connected`;
+
+      // Enable continue button if Claude is configured AND at least one data source is connected
+      const canContinue = connections.claude && dataSourceCount > 0;
+      document.getElementById('continue-btn').disabled = !canContinue;
+
+      // Update continue button text based on state
+      const continueBtn = document.getElementById('continue-btn');
+      if (!connections.claude) {
+        continueBtn.textContent = 'Configure Claude AI first →';
+      } else if (dataSourceCount === 0) {
+        continueBtn.textContent = 'Connect at least one source →';
+      } else {
+        continueBtn.textContent = 'Continue to Dashboard →';
+      }
+    }
+
+    async function connectClaude() {
+      const apiKey = document.getElementById('claude-api-key').value.trim();
+      const errorDiv = document.getElementById('claude-error');
+
+      if (!apiKey) {
+        errorDiv.textContent = 'Please enter your Anthropic API key';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      if (!apiKey.startsWith('sk-ant-')) {
+        errorDiv.textContent = 'Invalid API key format. It should start with sk-ant-';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('claude-connect-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      errorDiv.style.display = 'none';
+
+      try {
+        await window.api.claudeSetApiKey(apiKey);
+        connections.claude = true;
+        updateUI();
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Save API Key';
+    }
+
+    async function disconnectClaude() {
+      await window.api.claudeSetApiKey('');
+      connections.claude = false;
+      document.getElementById('claude-api-key').value = '';
+      updateUI();
+    }
+
+    function openAnthropicConsole() {
+      require('electron').shell.openExternal('https://console.anthropic.com/settings/keys');
+    }
+
+    async function connectGmail() {
+      const btn = document.getElementById('gmail-connect-btn');
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+
+      try {
+        await window.api.gmailAuth();
+        connections.gmail = true;
+        updateUI();
+      } catch (error) {
+        alert('Failed to connect Gmail: ' + error.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Connect Gmail';
+    }
+
+    async function disconnectGmail() {
+      await window.api.gmailDisconnect();
+      connections.gmail = false;
+      updateUI();
+    }
+
+    async function connectWhatsApp() {
+      const btn = document.getElementById('whatsapp-connect-btn');
+      btn.disabled = true;
+      btn.textContent = 'Initializing...';
+      document.getElementById('whatsapp-loading').style.display = 'flex';
+
+      try {
+        const result = await window.api.whatsappInit();
+        if (result.status === 'ready') {
+          connections.whatsapp = true;
+          updateUI();
+        } else if (result.status === 'timeout') {
+          // Timeout handled by event listener, just reset button
+          document.getElementById('whatsapp-loading').style.display = 'none';
+        }
+      } catch (error) {
+        document.getElementById('whatsapp-loading').style.display = 'none';
+        document.getElementById('whatsapp-qr-section').style.display = 'none';
+        // Don't show alert for timeout errors (check various forms of the message)
+        const errMsg = (error.message || '').toLowerCase();
+        if (!errMsg.includes('timeout') && !errMsg.includes('timed out')) {
+          alert('Failed to initialize WhatsApp: ' + error.message);
+        }
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Connect WhatsApp';
+    }
+
+    async function disconnectWhatsApp() {
+      await window.api.whatsappDisconnect();
+      connections.whatsapp = false;
+      document.getElementById('whatsapp-qr-section').style.display = 'none';
+      updateUI();
+    }
+
+    async function connectNotion() {
+      const token = document.getElementById('notion-token').value.trim();
+      const errorDiv = document.getElementById('notion-error');
+
+      if (!token) {
+        errorDiv.textContent = 'Please enter your Notion integration token';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('notion-connect-btn');
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+      errorDiv.style.display = 'none';
+
+      try {
+        const result = await window.api.notionAuth(token);
+        if (result.success) {
+          connections.notion = true;
+          updateUI();
+        } else {
+          errorDiv.textContent = result.error || 'Invalid token';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Connect Notion';
+    }
+
+    async function disconnectNotion() {
+      await window.api.notionDisconnect();
+      connections.notion = false;
+      document.getElementById('notion-token').value = '';
+      updateUI();
+    }
+
+    function openNotionIntegrations() {
+      require('electron').shell.openExternal('https://www.notion.so/my-integrations');
+    }
+
+    async function continueToApp() {
+      await window.api.completeSetup();
+    }
+  </script>
+</body>
+</html>

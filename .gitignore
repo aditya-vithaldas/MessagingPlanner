@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Electron build output
+dist/
+out/
+
+# Environment files
+.env
+.env.local
+
+# Credentials and sensitive data
+*.pem
+*.key
+credentials.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# WhatsApp session data (contains auth tokens)
+.wwebjs_auth/
+.wwebjs_cache/
+
+# SQLite database (user data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Electron store (contains encrypted credentials)
+# Note: This is in app data folder, not in project, but just in case
+config.json
